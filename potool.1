@@ -1,0 +1,102 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH POTOOL 1 "Jul 1, 2003"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+potool \- program to aid editing gettext po files
+.SH SYNOPSIS
+.B potool
+.RI FILENAME1
+.RI [ " FILENAME2 " ]
+.RI [\-f " f|nf|t|nt"]
+.RI [\-n " id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
+.RI [\-s]
+.RI [\-c]
+.RI [\-h]
+.sp
+.B poedit
+.RI [\-a]
+.RI file.po
+.sp
+.B postats
+.RI file.po
+.sp
+.B postats1
+.RI file.po
+.SH DESCRIPTION
+.B potool
+works in two (so far) modes. The first mode requires providing one
+filename, and works as a filter. In the second mode, the program replaces
+the translations in
+.RI FILENAME1
+with the translations from
+.RI FILENAME2.
+(So FILENAME1 is the base po file, while FILENAME2 is our working copy.)
+.SH OPTIONS
+.TP
+.B \-f filter
+Determines which po file entries should be retained.
+Existing filters are:
+.br
+t  \- translated entries
+.br
+nt \- untranslated entries
+.br
+f  \- fuzzy entries
+.br
+nf \- entries that are not fuzzy
+.TP
+.B \-n filter
+Determines which po file entries parts should not be retained.
+.br
+id    \- don't write 'id' parts
+.br
+str   \- don't write 'str' parts
+.br
+tr    \- don't write translations
+.br
+ucmt  \- don't write user's comments
+.br
+pcmt  \- don't write the comments regarding position in source files
+.br
+scmt  \- don't write special comments ('#, fuzzy, c-format, ...')
+.br
+dcmt  \- don't write reserved comments (usually starting with a dot)
+.br
+cmt   \- don't write any comments
+.br
+linf  \- change source line numbers to '1'
+.TP
+.B -s
+Don't write the entries themselves, only count them.
+.TP
+.B -c
+Overwrite all msgstrs with their msgids.
+.TP
+.B -h
+Display short usage help.
+.SH EXAMPLES
+.BR poedit
+is a simple wrapper script for potool which helps
+editing po files. Use its -a flag to edit all messages, not only the
+untranslated ones.
+.sp
+.BR postats
+and
+.BR postats1
+display statistics about how much is already
+translated.
+.SH SEE ALSO
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTHOR
+This manual page was written by
+.nh
+Marcin Owsiany <porridge@gnome.pl>,
+.hy
+using the description in Polish provided by
+.nh
+Zbigniew Chyla.

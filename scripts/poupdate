@@ -1,0 +1,17 @@
+#!/bin/bash
+
+MO_DIR=/usr/local/share/locale/pl/LC_MESSAGES
+
+if [ $# -gt 0 ]; then
+	files=$*
+else
+	files=*.po
+fi
+
+for f in $files; do
+	[ -f $f ] || continue
+	d=`echo $f | sed 's/\.po//'`
+	echo $d
+	rm -f ${MO_DIR}/$d.mo
+	msgfmt $f -o ${MO_DIR}/$d.mo
+done

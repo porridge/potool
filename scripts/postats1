@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ $# -gt 0 ]; then
+	files=$*
+else
+	files=*.po
+fi
+
+
+(
+	ntr=0
+	nall=0
+	for a in $files; do
+		[ -f $a ] || continue
+		tr=`potool $a -ft -s 2>/dev/null`
+		all=`potool $a -s 2>/dev/null`
+		fuzzy=`potool $a -ff -s 2>/dev/null`
+		printf '%-24s - %5s/%3s/%-5s (%3s%%)  -%s\n' ${a} ${tr} ${fuzzy} ${all} $((${tr}*100/${all})) $(($all-$tr))
+		ntr=$((${ntr}+${tr}))
+		nfuzzy=$((${nfuzzy}+${fuzzy}))
+		nall=$((${nall}+${all}))
+	done
+	printf '%-24s - %5s/%3s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nfuzzy} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
+) | sort -nt'(' +1
