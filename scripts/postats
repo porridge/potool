@@ -19,4 +19,4 @@ fi
 		nall=$((${nall}+${all}))
 	done
 	printf '%-24s - %5s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
-) | sort -nt'(' +1
+) | sort -nt'(' -k 1
