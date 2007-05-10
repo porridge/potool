@@ -1,12 +1,12 @@
 #
 # potool is a program aiding editing of po files
 # Copyright (C) 1999-2002 Zbigniew Chyla
-# Copyright (C) 2000-2003 Marcin Owsiany
+# Copyright (C) 2000-2007 Marcin Owsiany
 #
 # see LICENSE for licensing info
 #
 
-VER = 0.5
+VER = 0.7
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
