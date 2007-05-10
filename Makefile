@@ -31,6 +31,7 @@ po.tab.o lex.po.c lex.po.o: po-gram.h common.h
 
 lex.po.c: po-gram.lex
 	flex -Ppo $<
+#	flex --debug -Ppo $<
 
 po.tab.c: po-gram.y
 	bison -ppo -bpo -d $<
