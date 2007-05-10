@@ -135,14 +135,15 @@ po_copy_msgid (PoFile *pof)
 /* --- */
 
 typedef enum {
-	NO_ID           = 1 << 0,
-	NO_STR          = 1 << 1,
-	NO_STD_COMMENT  = 1 << 2,
-	NO_POS_COMMENT  = 1 << 3,
-	NO_SPEC_COMMENT = 1 << 4,
-	NO_RES_COMMENT  = 1 << 5,
-	NO_TRANSLATION  = 1 << 6,
-	NO_LINF         = 1 << 7
+	NO_CTX		= 1 << 0,
+	NO_ID           = 1 << 1,
+	NO_STR          = 1 << 2,
+	NO_STD_COMMENT  = 1 << 3,
+	NO_POS_COMMENT  = 1 << 4,
+	NO_SPEC_COMMENT = 1 << 5,
+	NO_RES_COMMENT  = 1 << 6,
+	NO_TRANSLATION  = 1 << 7,
+	NO_LINF         = 1 << 8
 } po_write_modes;
 
 enum {
@@ -195,7 +196,7 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 				word_len++;
 
 			if (line_has_eol && cur[word_len] == '\0' &&
-			    cur[word_len - 1] != SEP1 && cur[word_len - 1] != SEP2) {
+			    (word_len == 0 || (cur[word_len - 1] != SEP1 && cur[word_len - 1] != SEP2))) {
 				eol_len = 2;
 			} else {
 				eol_len = 0;
@@ -219,6 +220,28 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 		printf ("\"\n");
 	}
 	g_strfreev (lines);
+}
+
+static void
+write_msgstr (char *prefix, char *str, GSList *strn, po_write_modes mode)
+{
+	int prefix_len = strlen(prefix);
+
+	if (!(mode & NO_TRANSLATION)) {
+		if (str) {
+			printf ("%smsgstr ", prefix);
+			print_multi_line (str, 7 + prefix_len, prefix);
+		} else {
+			GSList *x;
+			for (x = strn; x != NULL; x = x->next) {
+				MsgStrX *m = x->data;
+				printf ("%smsgstr[%d] ", prefix, m->n);
+				print_multi_line (m->str, 10 + prefix_len, prefix);
+			}
+		}
+	} else {
+		printf ("%smsgstr \"\"\n", prefix);
+	}
 }
 
 static void
@@ -272,17 +295,20 @@ po_write (PoFile *pof, po_write_modes mode)
 				printf ("#,%s\n", (char *) ll->data);
 			}
 		}
+		if ((!(mode & NO_CTX)) && po->ctx) {
+			printf ("msgctxt ");
+			print_multi_line (po->ctx, 8, "");
+		}
 		if (!(mode & NO_ID)) {
 			printf ("msgid ");
 			print_multi_line (po->id, 6, "");
+			if (po->id_plural) {
+				printf ("msgid_plural ");
+				print_multi_line (po->id_plural, 13, "");
+			}
 		}
 		if (!(mode & NO_STR)) {
-			if (!(mode & NO_TRANSLATION)) {
-				printf ("msgstr ");
-				print_multi_line (po->str, 7, "");
-			} else {
-				printf ("msgstr \"\"\n");
-			}
+			write_msgstr ("", po->str, po->msgstrxs, mode);
 		}
 
 		if (l->next != NULL) {
@@ -298,23 +324,32 @@ po_write (PoFile *pof, po_write_modes mode)
 		PoObsoleteEntry *po = l->data;
 		GSList *ll;
 
+		if (!(mode & NO_STD_COMMENT)) {
+			for (ll = po->comments.std; ll != NULL; ll = ll->next) {
+				printf ("#%s\n", (char *) ll->data);
+			}
+		}
 		if (!(mode & NO_SPEC_COMMENT)) {
 			for (ll = po->comments.spec; ll != NULL; ll = ll->next) {
 				printf ("#,%s\n", (char *) ll->data);
 			}
 		}
 
+		if ((!(mode & NO_CTX)) && po->ctx) {
+			printf ("#~ msgctxt ");
+			print_multi_line (po->ctx, 11, "#~ ");
+		}
+
 		if (!(mode & NO_ID)) {
 			printf ("#~ msgid ");
 			print_multi_line (po->id, 9, "#~ ");
+			if (po->id_plural) {
+				printf ("#~ msgid_plural ");
+				print_multi_line (po->id_plural, 16, "#~ ");
+			}
 		}
 		if (!(mode & NO_STR)) {
-			if (!(mode & NO_TRANSLATION)) {
-				printf ("#~ msgstr ");
-				print_multi_line (po->str, 10, "#~ ");
-			} else {
-				printf ("#~ msgstr \"\"\n");
-			}
+			write_msgstr ("#~ ", po->str, po->msgstrxs, mode);
 		}
 
 		if (l->next != NULL) {
@@ -377,7 +412,7 @@ main (int argc, char **argv)
 		FILENAME1 [FILENAME2]
 		[-f f|nf|t|nt]
 		[-s] [-c]
-		[-n id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
+		[-n ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
 		[-h]
 	 */
 	while ((c = getopt (argc, argv, "f:n:sch")) != EOF) {
@@ -390,7 +425,9 @@ main (int argc, char **argv)
 				exit (0);
 				break;
 			case 'n' :
-				if (strcmp (optarg, "id") == 0) {
+				if (strcmp (optarg, "ctxt") == 0) {
+					write_mode |= NO_CTX;
+				} else if (strcmp (optarg, "id") == 0) {
 					write_mode |= NO_ID;
 				} else if (strcmp (optarg, "str") == 0) {
 					write_mode |= NO_STR;
@@ -465,6 +502,7 @@ main (int argc, char **argv)
 			}
 			po_write (pof, write_mode);
 		}
+		g_free (pof);
 	} else {
 		PoFile *bpof, *pof;
 		PoEntry_set *bpo_set;
@@ -479,6 +517,8 @@ main (int argc, char **argv)
 			po_copy_msgid (pof);
 		}
 		po_write (bpof, write_mode);
+		g_free (bpof);
+		g_free (pof);
 	}
 
 	return 0;

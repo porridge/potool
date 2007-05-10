@@ -1,5 +1,6 @@
 potool jest programem wspomagaj±cym edycjê plików po
 Copyright (C) 1999-2003 Zbigniew Chyla
+Copyright (C) 2007 Marcin Owsiany
 
 Licencja znajduje siê w pliku LICENSE
 
@@ -9,7 +10,7 @@ Pakiety potrzebne do kompilacji programu:
 Wywo³anie programu:
 
 	potool FILENAME1 [FILENAME2] [-h] [-f f|nf|t|nt] [-s]
-	       [-n id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
+	       [-n ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
 
 Program pracuje w jednym z dwóch (na razie) trybów. W pierwszym wymaga
 podania jednej nazwy pliku i dzia³a wówczas jak filtr. W drugim - powoduje
@@ -40,6 +41,7 @@ ka¿dym z wpisów _nie_ powinny byæ wy¶wietlane przy wypisywaniu ich przez
 program. Dozwolona jest dowolna liczba opcji -n.
 
 Dopuszczalne parametry:
+	ctxt - nie wypisuj czê¶ci 'ctxt'
 	id   - nie wypisuj czê¶ci 'id'
 	str  - nie wypisuj czê¶ci 'str'
 	tr   - nie wypisuj t³umaczeñ (lecz pust± czê¶æ 'str')

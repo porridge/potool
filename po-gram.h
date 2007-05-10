@@ -21,15 +21,22 @@ typedef struct {
 } PoComments;
 
 typedef struct {
+	char *str;
+	int n;
+} MsgStrX;
+
+typedef struct {
 	PoComments comments;
 	gboolean is_fuzzy, is_c_format;
-	char *id, *str;
+	char *ctx, *id, *id_plural, *str;
+	GSList *msgstrxs;
 } PoEntry;
 
 typedef struct {
 	PoComments comments;
 	gboolean is_fuzzy, is_c_format;
-	char *id, *str;
+	char *ctx, *id, *id_plural, *str;
+	GSList *msgstrxs;
 } PoObsoleteEntry;
 
 typedef struct {

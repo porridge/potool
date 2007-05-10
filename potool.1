@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH POTOOL 1 "Jul 1, 2003"
+.TH POTOOL 1 "May 11, 2007"
 .\" Please adjust this date whenever revising the manpage.
 .SH NAME
 potool \- program to aid editing gettext po files
@@ -11,7 +11,7 @@ potool \- program to aid editing gettext po files
 .RI FILENAME1
 .RI [ " FILENAME2 " ]
 .RI [\-f " f|nf|t|nt"]
-.RI [\-n " id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
+.RI [\-n " ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
 .RI [\-s]
 .RI [\-c]
 .RI [\-h]
@@ -50,6 +50,8 @@ nf \- entries that are not fuzzy
 .TP
 .B \-n filter
 Determines which po file entries parts should not be retained.
+.br
+ctxt  \- don't write 'ctxt' parts
 .br
 id    \- don't write 'id' parts
 .br

@@ -33,9 +33,11 @@ static char *concat_strings (GSList *slist);
 	PoEntry *entry_val;
 	PoObsoleteEntry *obsolete_entry_val;
 	PoComments comments_val;
+	MsgStrX *msgstrx_val;
 }
 
-%token MSGID MSGSTR OBSOLETE_MSGID OBSOLETE_MSGSTR INVALID
+%token MSGCTXT OBSOLETE_MSGCTXT MSGID MSGID_PLURAL MSGSTR OBSOLETE_MSGID OBSOLETE_MSGID_PLURAL OBSOLETE_MSGSTR INVALID
+%token <str_val> MSGSTR_X
 %token <str_val> STRING
 %token <str_val> OBSOLETE_STRING
 %token <str_val> COMMENT_STD
@@ -43,11 +45,17 @@ static char *concat_strings (GSList *slist);
 %token <str_val> COMMENT_SPECIAL
 %token <str_val> COMMENT_RESERVED
 
+%type <str_val> msgctx
+%type <str_val> obsolete_msgctx
 %type <gslist_val> string_list
 %type <gslist_val> obsolete_string_list
 %type <gslist_val> really_obsolete_string_list
 %type <gslist_val> msg_list
 %type <gslist_val> obsolete_msg_list
+%type <gslist_val> msgstr_x_list
+%type <gslist_val> obsolete_msgstr_x_list
+%type <msgstrx_val> msgstr_x
+%type <msgstrx_val> obsolete_msgstr_x
 %type <comments_val> comments
 %type <entry_val> msg
 %type <obsolete_entry_val> obsolete_msg
@@ -120,14 +128,85 @@ comments
 	}
 	;
 
+msgstr_x
+	: MSGSTR MSGSTR_X string_list
+	{
+		$$ = g_new(MsgStrX, 1);
+		$$->n = atoi($2);
+		$$->str = concat_strings ($3);
+		g_free ($2);
+		g_slist_free_custom ($3, g_free);
+	}
+	;
+
+obsolete_msgstr_x
+	: OBSOLETE_MSGSTR MSGSTR_X obsolete_string_list
+	{
+		$$ = g_new(MsgStrX, 1);
+		$$->n = atoi($2);
+		$$->str = concat_strings ($3);
+		g_free ($2);
+		g_slist_free_custom ($3, g_free);
+	}
+	;
+
+msgstr_x_list
+	: msgstr_x
+	{
+		$$ = g_slist_append (NULL, $1);
+	}
+	| msgstr_x_list msgstr_x
+	{
+		$$ = g_slist_append ($1, $2);
+	}
+	;
+
+obsolete_msgstr_x_list
+	: obsolete_msgstr_x
+	{
+		$$ = g_slist_append (NULL, $1);
+	}
+	| obsolete_msgstr_x_list obsolete_msgstr_x
+	{
+		$$ = g_slist_append ($1, $2);
+	}
+	;
+
+msgctx
+	: /* empty */
+	{
+		$$ = NULL;
+	}
+	| MSGCTXT string_list
+	{
+		$$ = concat_strings ($2);
+		g_slist_free_custom ($2, g_free);
+	}
+	;
+
+obsolete_msgctx
+	: /* empty */
+	{
+		$$ = NULL;
+	}
+	| OBSOLETE_MSGCTXT obsolete_string_list
+	{
+		$$ = concat_strings ($2);
+		g_slist_free_custom ($2, g_free);
+	}
+	;
+
 msg
-	: comments MSGID string_list MSGSTR string_list
+	: comments msgctx MSGID string_list MSGSTR string_list
 	{
 		GSList *l;
 
 		$$ = g_new (PoEntry, 1);
-		$$->id = concat_strings ($3);
-		$$->str = concat_strings ($5);
+		$$->ctx = $2;
+		$$->id = concat_strings ($4);
+		$$->id_plural = NULL;
+		$$->str = concat_strings ($6);
+		$$->msgstrxs = NULL;
 		$$->comments = $1;
 		$$->is_fuzzy = $$->is_c_format = 0;
 		for (l = $$->comments.spec; l != NULL; l = l->next) {
@@ -140,19 +219,47 @@ msg
 				$$->is_c_format = 1;
 			}
 		}
-		g_slist_free_custom ($3, g_free);
-		g_slist_free_custom ($5, g_free);
+		g_slist_free_custom ($4, g_free);
+		g_slist_free_custom ($6, g_free);
+	}
+	| comments msgctx MSGID string_list MSGID_PLURAL string_list msgstr_x_list
+	{
+		GSList *l;
+
+		$$ = g_new (PoEntry, 1);
+		$$->ctx = $2;
+		$$->id = concat_strings ($4);
+		$$->id_plural = concat_strings ($6);
+		$$->str = NULL;
+		$$->msgstrxs = $7;
+		$$->comments = $1;
+		$$->is_fuzzy = $$->is_c_format = 0;
+		for (l = $$->comments.spec; l != NULL; l = l->next) {
+			char *s = l->data;
+
+			if (strstr (s, " fuzzy") != NULL) {
+				$$->is_fuzzy = 1;
+			}
+			if (strstr (s, " c-format") != NULL) {
+				$$->is_c_format = 1;
+			}
+		}
+		g_slist_free_custom ($4, g_free);
+		g_slist_free_custom ($6, g_free);
 	}
 	;
 
 obsolete_msg
-: comments OBSOLETE_MSGID obsolete_string_list OBSOLETE_MSGSTR obsolete_string_list
+	: comments obsolete_msgctx OBSOLETE_MSGID obsolete_string_list OBSOLETE_MSGSTR obsolete_string_list
 	{
 		GSList *l;
 
 		$$ = g_new (PoObsoleteEntry, 1);
-		$$->id = concat_strings ($3);
-		$$->str = concat_strings ($5);
+		$$->ctx = $2;
+		$$->id = concat_strings ($4);
+		$$->id_plural = NULL;
+		$$->str = concat_strings ($6);
+		$$->msgstrxs = NULL;
 		$$->comments = $1;
 		$$->is_fuzzy = $$->is_c_format = 0;
 		for (l = $$->comments.spec; l != NULL; l = l->next) {
@@ -165,8 +272,33 @@ obsolete_msg
 				$$->is_c_format = 1;
 			}
 		}
-		g_slist_free_custom ($3, g_free);
-		g_slist_free_custom ($5, g_free);
+		g_slist_free_custom ($4, g_free);
+		g_slist_free_custom ($6, g_free);
+	}
+	| comments obsolete_msgctx OBSOLETE_MSGID obsolete_string_list OBSOLETE_MSGID_PLURAL obsolete_string_list obsolete_msgstr_x_list
+	{
+		GSList *l;
+
+		$$ = g_new (PoObsoleteEntry, 1);
+		$$->ctx = $2;
+		$$->id = concat_strings ($4);
+		$$->id_plural = concat_strings ($6);
+		$$->str = NULL;
+		$$->msgstrxs = $7;
+		$$->comments = $1;
+		$$->is_fuzzy = $$->is_c_format = 0;
+		for (l = $$->comments.spec; l != NULL; l = l->next) {
+			char *s = l->data;
+
+			if (strstr (s, " fuzzy") != NULL) {
+				$$->is_fuzzy = 1;
+			}
+			if (strstr (s, " c-format") != NULL) {
+				$$->is_c_format = 1;
+			}
+		}
+		g_slist_free_custom ($4, g_free);
+		g_slist_free_custom ($6, g_free);
 	}
 	;
 

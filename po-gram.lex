@@ -45,28 +45,36 @@ void po_scan_close_file (void)
 %}
 
 %%
+"msgctxt"           { return MSGCTXT; }
 "msgid"             { return MSGID; }
+"msgid_plural"      { return MSGID_PLURAL; }
 "msgstr"            { return MSGSTR; }
+"["[0-9]*"]"          {
+	polval.str_val = g_strndup (yytext + 1, yyleng - 2);
+	return MSGSTR_X;
+}
 \"(\\.|[^\\"])*\"   {
-	polval.str_val = g_strndup (yytext + 1, strlen (yytext) - 2);
+	polval.str_val = g_strndup (yytext + 1, yyleng - 2);
 	return STRING;
 }
+"#~ msgctxt"           { return OBSOLETE_MSGCTXT; }
 "#~ msgid"             { return OBSOLETE_MSGID; }
+"#~ msgid_plural"      { return OBSOLETE_MSGID_PLURAL; }
 "#~ msgstr"            { return OBSOLETE_MSGSTR; }
 "#~ "\"(\\.|[^\\"])*\"   {
-	polval.str_val = g_strndup (yytext + 4, strlen (yytext) - 5);
+	polval.str_val = g_strndup (yytext + 4, yyleng - 5);
 	return OBSOLETE_STRING;
 }
 "#:".*"\n"          {
-	polval.str_val = g_strndup (yytext + 2, strlen (yytext) - 3);
+	polval.str_val = g_strndup (yytext + 2, yyleng - 3);
 	return COMMENT_POS;
 }
 "#,".*"\n"          {
-	polval.str_val = g_strndup (yytext + 2, strlen (yytext) - 3);
+	polval.str_val = g_strndup (yytext + 2, yyleng - 3);
 	return COMMENT_SPECIAL;
 }
 "# ".*"\n"          {
-	polval.str_val = g_strndup (yytext + 1, strlen (yytext) - 2);
+	polval.str_val = g_strndup (yytext + 1, yyleng - 2);
 	return COMMENT_STD;
 }
 "#\n"               {
@@ -74,7 +82,7 @@ void po_scan_close_file (void)
 	return COMMENT_STD;
 }
 "#"[^~\n].*"\n"       {
-	polval.str_val = g_strndup (yytext + 1, strlen (yytext) - 2);
+	polval.str_val = g_strndup (yytext + 1, yyleng - 2);
 	return COMMENT_RESERVED;
 }
 
