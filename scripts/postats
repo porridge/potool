@@ -13,10 +13,12 @@ fi
 	for a in $files; do
 		[ -f $a ] || continue
 		tr=`potool $a -ft -s 2>/dev/null`
+		[ $? -eq 0 ] || { echo "Error: \"potool $a -ft -s\" failed"; continue ; }
 		all=`potool $a -s 2>/dev/null`
+		[ $? -eq 0 ] || { echo "Error: \"potool $a -s\" failed"; continue ; }
 		printf '%-24s - %5s/%-5s (%3s%%)  -%s\n' ${a} ${tr} ${all} $((${tr}*100/${all})) $(($all-$tr))
 		ntr=$((${ntr}+${tr}))
 		nall=$((${nall}+${all}))
 	done
-	printf '%-24s - %5s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
+	[ $nall -gt 0 ] && printf '%-24s - %5s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
 ) | sort -nt'(' -k 1
