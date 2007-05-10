@@ -12,6 +12,7 @@ DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
 INSTALL = install
 BININSTALL = $(INSTALL) -s
+GTAR = tar
 
 GLIB_LIB = $(shell pkg-config --libs glib-2.0)
 GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
@@ -48,6 +49,7 @@ clean:
 
 dist:
 	cd ..; \
-	 rm -f potool_$(VER).tar.gz potool-$(VER); \
+	 rm -f potool-$(VER).tar{,.gz} potool-$(VER); \
 	 ln -s potool potool-$(VER); \
-	 tar -hcf potool-$(VER).tar potool-$(VER) && gzip -9 potool-$(VER).tar
+	 $(GTAR) --exclude='*/CVS' --exclude='*/.cvsignore' --owner=root --group=root -hcf potool-$(VER).tar potool-$(VER) && \
+	 gzip -9 potool-$(VER).tar
