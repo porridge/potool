@@ -6,7 +6,7 @@
 # see LICENSE for licensing info
 #
 
-VER = 0.7
+VER = 0.8
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
