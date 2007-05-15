@@ -20,14 +20,25 @@
 typedef gboolean po_filter_func (PoEntry *);
 
 void
+msgstrx_free(MsgStrX *msgstrx)
+{
+	g_free (msgstrx->str);
+	g_free (msgstrx);
+}
+
+void
 po_entry_free (PoEntry *po)
 {
 	g_slist_free_custom (po->comments.std, g_free);
 	g_slist_free_custom (po->comments.pos, g_free);
 	g_slist_free_custom (po->comments.res, g_free);
 	g_slist_free_custom (po->comments.spec, g_free);
+	g_slist_free_custom (po->msgstrxs, msgstrx_free);
 	g_free (po->id);
+	g_free (po->id_plural);
+	g_free (po->ctx);
 	g_free (po->str);
+	g_free (po);
 }
 
 void
@@ -37,8 +48,20 @@ po_obsolete_entry_free (PoObsoleteEntry *po)
 	g_slist_free_custom (po->comments.pos, g_free);
 	g_slist_free_custom (po->comments.res, g_free);
 	g_slist_free_custom (po->comments.spec, g_free);
+	g_slist_free_custom (po->msgstrxs, msgstrx_free);
 	g_free (po->id);
+	g_free (po->id_plural);
+	g_free (po->ctx);
 	g_free (po->str);
+	g_free (po);
+}
+
+void
+po_free (PoFile *pof)
+{
+	g_slist_free_custom (pof->entries, po_entry_free);
+	g_slist_free_custom (pof->obsolete_entries, po_obsolete_entry_free);
+	g_free (pof);
 }
 
 /* --- PoEntry filters --- */
@@ -46,13 +69,19 @@ po_obsolete_entry_free (PoObsoleteEntry *po)
 static gboolean
 po_filter_translated (PoEntry *po)
 {
-	return po->str[0] != '\0';
+	if (po->str)
+		return po->str[0] != '\0';
+	else
+		return po->id_plural[0] != '\0';
 }
 
 static gboolean
 po_filter_not_translated (PoEntry *po)
 {
-	return po->str[0] == '\0';
+	if (po->str)
+		return po->str[0] == '\0';
+	else
+		return po->id_plural[0] == '\0';
 }
 
 static gboolean
@@ -502,7 +531,7 @@ main (int argc, char **argv)
 			}
 			po_write (pof, write_mode);
 		}
-		g_free (pof);
+		po_free (pof);
 	} else {
 		PoFile *bpof, *pof;
 		PoEntry_set *bpo_set;
@@ -517,8 +546,8 @@ main (int argc, char **argv)
 			po_copy_msgid (pof);
 		}
 		po_write (bpof, write_mode);
-		g_free (bpof);
-		g_free (pof);
+		po_free (bpof);
+		po_free (pof);
 	}
 
 	return 0;
