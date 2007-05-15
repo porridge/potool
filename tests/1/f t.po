@@ -1,0 +1,34 @@
+# A test for potool, based on translation of gnome-games.po to Polish
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-games\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-11-12 15:56+0100\n"
+"PO-Revision-Date: 2006-11-15 21:14+0100\n"
+"Last-Translator: wadim dziedzic <nikdo@aviary.pl>\n"
+"Language-Team: Polish <translators@gnomepl.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+
+#: ../aisleriot/aisleriot.schemas.in.h:1
+msgid "Select the style of control"
+msgstr "Wybierz rodzaj sterowania"
+
+#: ../gtali/gyahtzee.c:150
+#, c-format
+msgid "%s wins the game with %d point"
+msgid_plural "%s wins the game with %d points"
+msgstr[0] "%s wygral(a) gre %d punktem"
+msgstr[1] "%s wygral(a) gre z %d punktami"
+msgstr[2] "%s wygral(a) gre z %d punktami"
+
+# should be treated as untranslated, but is treated as translated because
+# potool does not know about nplurals
+#: ../a.c:150
+#, c-format
+msgid "%s bla"
+msgid_plural "%s blas"
+msgstr[0] "%s wygral(a) gre punktem"

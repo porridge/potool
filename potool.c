@@ -27,6 +27,58 @@ msgstrx_free(MsgStrX *msgstrx)
 }
 
 void
+po_list_str_dup(GSList *list)
+{
+	GSList *l;
+	for (l = list; l != NULL; l = l->next) {
+		char *s = l->data;
+		l->data = g_strdup (s);
+	}
+}
+
+void
+po_list_msgstrx_dup(GSList *list)
+{
+	GSList *l;
+	for (l = list; l != NULL; l = l->next) {
+		MsgStrX *s = l->data;
+		MsgStrX *n = g_new (MsgStrX, 1);
+		n->n = s->n;
+		n->str = g_strdup (s->str);
+		l->data = n;
+	}
+}
+
+PoEntry *
+po_entry_copy (PoEntry *ret, PoEntry *po)
+{
+	if (ret == NULL)
+		ret = g_new (PoEntry, 1);
+
+	ret->comments.std = g_slist_copy (po->comments.std);
+	po_list_str_dup(ret->comments.std);
+	ret->comments.pos = g_slist_copy (po->comments.pos);
+	po_list_str_dup(ret->comments.pos);
+	ret->comments.res = g_slist_copy (po->comments.res);
+	po_list_str_dup(ret->comments.res);
+	ret->comments.spec = g_slist_copy (po->comments.spec);
+	po_list_str_dup(ret->comments.spec);
+
+	ret->is_fuzzy = po->is_fuzzy;
+	ret->is_c_format = po->is_c_format;
+
+	ret->ctx = g_strdup (po->ctx);
+	ret->id = g_strdup (po->id);
+	ret->id_plural = g_strdup (po->id_plural);
+	ret->str = g_strdup (po->str);
+
+	ret->msgstrxs = g_slist_copy (po->msgstrxs);
+	po_list_msgstrx_dup(ret->msgstrxs);
+
+	return ret;
+}
+
+void
 po_entry_free (PoEntry *po)
 {
 	g_slist_free_custom (po->comments.std, g_free);
@@ -66,13 +118,25 @@ po_free (PoFile *pof)
 
 /* --- PoEntry filters --- */
 
+gint
+msgstrx_is_same_firstchar (gconstpointer a, gconstpointer b)
+{
+	const MsgStrX *as = a, *bs = b;
+	return ! (as == bs || (as && bs && ((as->str == bs->str) || (as->str && bs->str && as->str[0] == bs->str[0]))));
+}
+
 static gboolean
 po_filter_translated (PoEntry *po)
 {
 	if (po->str)
 		return po->str[0] != '\0';
-	else
-		return po->id_plural[0] != '\0';
+	
+	/* With plural forms, only return true if ALL forms are translated. The
+	 * list is guaranteed to be non-empty by the grammar */
+	else {
+		MsgStrX empty = { "", 0 };
+		return NULL == g_slist_find_custom (po->msgstrxs, &empty, msgstrx_is_same_firstchar);
+	}
 }
 
 static gboolean
@@ -80,8 +144,13 @@ po_filter_not_translated (PoEntry *po)
 {
 	if (po->str)
 		return po->str[0] == '\0';
-	else
-		return po->id_plural[0] == '\0';
+
+	/* With plural forms, only return true if ANY forms are not translated.
+	 * The list is guaranteed to be non-empty by the grammar */
+	else {
+		MsgStrX empty = { "", 0 };
+		return NULL != g_slist_find_custom (po->msgstrxs, &empty, msgstrx_is_same_firstchar);
+	}
 }
 
 static gboolean
@@ -106,6 +175,8 @@ po_apply_filter (PoFile *pof, po_filter_func *filter)
 	for (npo_list = NULL, l = pof->entries; l != NULL; l = l->next) {
 		if (filter ((PoEntry *) l->data)) {
 			npo_list = g_slist_prepend (npo_list, l->data);
+		} else {
+			po_entry_free (l->data);
 		}
 	}
 	g_slist_free (pof->entries);
@@ -155,8 +226,16 @@ po_copy_msgid (PoFile *pof)
 	for (l = pof->entries; l != NULL; l = l->next) {
 		PoEntry *po = l->data;
 
-		g_free (po->str);
-		po->str = g_strdup (po->id);
+		if (po->str) {
+			g_free (po->str);
+			po->str = g_strdup (po->id);
+		} else {
+			MsgStrX *m = g_new (MsgStrX, 1);
+			m->n = 0;
+			m->str = g_strdup (po->id);
+			g_slist_free_custom (po->msgstrxs, msgstrx_free);
+			po->msgstrxs = g_slist_append(NULL, m);
+		}
 	}
 
 }
@@ -413,13 +492,8 @@ po_set_update (PoEntry_set *po_set, GSList *po_list)
 		PoEntry *po = (PoEntry *) l->data, *hpo;
 
 		if ((hpo = g_hash_table_lookup (po_set, po->id)) != NULL) {
-			hpo->str = po->str;
-			hpo->comments.std = po->comments.std;
-			hpo->comments.pos = po->comments.pos;
-			hpo->comments.res = po->comments.res;
-			hpo->comments.spec = po->comments.spec;
-			hpo->is_fuzzy = po->is_fuzzy;
-			hpo->is_c_format = po->is_c_format;
+			/* making a deep copy, since we are about to free po_list */
+			po_entry_copy (hpo, po);
 		} else {
 			g_warning (_("Unknown msgid: %s"), po->id);
 		}
@@ -541,10 +615,10 @@ main (int argc, char **argv)
 		bpo_set = po_set_create (bpof->entries);
 		pof = po_read (fn);
 		po_apply_filters (pof, ifilters);
-		bpo_set = po_set_update (bpo_set, pof->entries);
 		if (copy_msgid) {
 			po_copy_msgid (pof);
 		}
+		bpo_set = po_set_update (bpo_set, pof->entries);
 		po_write (bpof, write_mode);
 		po_free (bpof);
 		po_free (pof);

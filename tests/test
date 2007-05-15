@@ -1,0 +1,17 @@
+for dir in 1
+do
+	echo TESTING $dir/no filter
+	${WRAPPER} ../potool $dir/in.po | diff -u $dir/in.po -
+	(cd $dir && ls -1 | egrep -v '^(in.po|CVS)$') | while read out
+	do
+		echo "TESTING $dir/${out/.po}"
+		${WRAPPER} ../potool -${out/.po} $dir/in.po | diff -u $dir/"${out}" -
+	done
+done
+
+for dir in 2
+do
+	echo TESTING $dir/work.po
+	${WRAPPER} ../potool $dir/in.po $dir/work.po | diff -u $dir/work.po -
+done
+
