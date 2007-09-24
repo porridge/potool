@@ -6,7 +6,7 @@
 # see LICENSE for licensing info
 #
 
-VER = 0.9
+VER = 0.10
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
@@ -41,13 +41,13 @@ install: potool
 	$(BININSTALL) potool $(BINDIR)
 	$(INSTALL) scripts/poedit $(BINDIR)
 	$(INSTALL) scripts/postats $(BINDIR)
-	$(INSTALL) scripts/postats1 $(BINDIR)
 	$(INSTALL) scripts/poupdate $(BINDIR)
+	$(INSTALL) change-po-charset $(BINDIR)
 
 clean:
 	rm -f $(OBJS) *~ lex.po.c po.tab.[ch] potool scripts/*~
 
-dist:
+dist: clean
 	cd ..; \
 	 rm -f potool-$(VER).tar{,.gz} potool-$(VER); \
 	 ln -s potool potool-$(VER); \
