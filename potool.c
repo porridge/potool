@@ -154,6 +154,15 @@ po_filter_not_translated (PoEntry *po)
 }
 
 static gboolean
+po_filter_not_translated_and_header (PoEntry *po)
+{
+	if (po->id[0] == '\0')
+		return 1;
+	else
+		return po_filter_not_translated (po);
+}
+
+static gboolean
 po_filter_fuzzy (PoEntry *po)
 {
 	return po->is_fuzzy;
@@ -188,8 +197,9 @@ typedef enum {
 	NOT_FUZZY_FILTER        = 1 << 1,
 	TRANSLATED_FILTER       = 1 << 2,
 	NOT_TRANSLATED_FILTER   = 1 << 3,
-	OBSOLETE_FILTER         = 1 << 4,
-	NOT_OBSOLETE_FILTER     = 1 << 5,
+	NOT_TRANSLATED_H_FILTER	= 1 << 4, // same as NOT_TRANSLATED_FILTER but includes msgid "" header
+	OBSOLETE_FILTER         = 1 << 5,
+	NOT_OBSOLETE_FILTER     = 1 << 6,
 } PoFilters;
 
 
@@ -207,6 +217,9 @@ po_apply_filters (PoFile *pof, PoFilters filters)
 	}
 	if ((filters & NOT_TRANSLATED_FILTER) != 0) {
 		po_apply_filter (pof, po_filter_not_translated);
+	}
+	if ((filters & NOT_TRANSLATED_H_FILTER) != 0) {
+		po_apply_filter (pof, po_filter_not_translated_and_header);
 	}
 	if ((filters & OBSOLETE_FILTER) != 0) {
 		g_slist_free_custom (pof->entries, po_entry_free);
@@ -513,7 +526,7 @@ main (int argc, char **argv)
 
 	/*
 		FILENAME1 [FILENAME2]
-		[-f f|nf|t|nt]
+		[-f f|nf|t|nt|nth|o|no]
 		[-s] [-c]
 		[-n ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
 		[-h]
@@ -568,6 +581,8 @@ main (int argc, char **argv)
 					ifilters |= TRANSLATED_FILTER;
 				} else if (strcmp (optarg, "nt") == 0) {
 					ifilters |= NOT_TRANSLATED_FILTER;
+				} else if (strcmp (optarg, "nth") == 0) {
+					ifilters |= NOT_TRANSLATED_H_FILTER;
 				} else if (strcmp (optarg, "o") == 0) {
 					ifilters |= OBSOLETE_FILTER;
 				} else if (strcmp (optarg, "no") == 0) {
