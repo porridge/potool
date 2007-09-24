@@ -1,0 +1,37 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH POSTATS 1 "September 24, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+postats \- summarize translation progress of gettext po files
+.SH SYNOPSIS
+.B postats
+.RI [ \-f ]
+.RI [ FILENAME\ ... ]
+.SH DESCRIPTION
+.B postats
+is a simple shell script, which uses
+.BR potool (1)
+and
+.BR wc (1)
+displays the count of translated and non-translated entries (with the
+percentage) in the specified files. If no files are specified, it defaults to
+all files with extension ".po" in the current directory. It also displays a
+summary count for all the files.
+.SH OPTIONS
+.TP
+.B \-f
+causes postats do include the counts of fuzzy entries as well.
+.SH SEE ALSO
+.BR potool (1),
+.BR wc (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTHOR
+postats was written by
+.nh
+Zbigniew Chyla
+.ny
+and is currently being maintained by
+.nh
+Marcin Owsiany <porridge@debian.org>.

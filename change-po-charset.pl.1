@@ -1,0 +1,32 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH CHANGE-PO-CHARSET 1 "24 września 2007"
+.\" Proszę aktualizować datę przy zmianach treści
+.SH NAZWA
+change-po-charset \- zmienia atrybut charset w nagłówku content-type w pliku po gettext
+.SH SKŁADNIA
+.B change-po-charset
+.RI <charset>
+.RI PLIK1
+.RI [ " PLIK2 " ... ]
+.SH OPIS
+.B change-po-charset
+to prosty skrypt w Perlu, który czyta podane pliki, i wypisuje je na
+standardowym wyjściu, dokonując tylko następującej modyfikacji. W pierwszym
+wpisie msgstr jaki napotka, zmienia wartość atrybutu "charset" w nagłówku
+Content-Type na taką, jak pierwszy parametr z jakim został uruchomiony.
+.sp
+Uwaga: skrypt nie zmienia samego kodowania znaków w treści plików. Jest on
+używany przez
+.BR potooledit (1)
+w celu poprawienia nagłówka Content-Type po zmianie kodowania pliku przy pomocy
+.BR iconv (1).
+.SH PATRZ TAKŻE
+.BR potooledit (1),
+.BR iconv (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTOR
+change-po-charset został napisany przez
+.nh
+Marcina Owsianego <porridge@debian.org>.

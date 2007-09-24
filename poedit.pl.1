@@ -1,0 +1,74 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH POEDIT 1 "21 września 2007"
+.\" Proszę aktualizować datę przy zmianach treści
+.SH NAZWA
+poedit \- program wspomagający edycję plików po gettext
+.SH SKŁADNIA
+.B poedit
+.RI [\-a]
+.RI [\-n]
+.RI <plik.po>
+.sp
+.B potooledit
+.RI [\-a]
+.RI [\-n]
+.RI <plik.po>
+.SH OPIS
+.B poedit
+to skrypt powłoki, wspomagający edycję plików po gettext przy pomocy Twojego
+ulubionego edytora. Używa on także poleceń
+.BR potool (1)
+oraz
+.BR iconv (1).
+.P
+W pierwszej kolejności poedit pobiera nieprzetłumaczone wpisy z podanego pliku
+(lub, jeśli podano opcję
+.BR \-a ,
+zmienia kolejność wpisów tak, aby przetłumaczone wpisy były skupione osobno, a
+nieprzetłumaczone - osobno) i umieszcza je w pliku tymczasowym. Następnie
+zmienia kodowanie pliku na takie, jakiego używa locale środowiska, i otwiera go
+w Twoim ulubionym edytorze, umożliwiając dodanie nowych tłumaczeń. Po
+zamknięciu edytora, przekodowuje plik tymczasowy z powrotem do oryginalnego
+kodowania, i włącza zmienione tłumaczenia z powrotem od oryginalnego pliku.
+.P
+.B poedit
+jest także znany pod nazwą
+.B potooledit
+w systemie Debian, aby uniknąć kolizji z innym programem o tej samej nazwie.
+.SH OPCJE
+.TP
+.B \-a
+powoduje także włączenie przetłumaczonych wpisów do tymczasowego pliku do
+edycji (grupuje je jednak oddzielnie).
+.br
+Bez tej opcji tylko nieprzetłumaczone wpisy (i nagłówek pliku) są przedstawione
+do edycji.
+.TP
+.B \-n
+powoduje
+.I zaniechanie
+jakiejkolwiek zmiany kodowania przed lub po edycji pliku.
+.br
+Należy unikać używania tej opcji bez konkretnej potrzeby lub zrozumienia jej
+konsekwencji (zwłaszcza gdy nie używa się
+.BR \-a )
+w przypadku plików w kodowaniu niezgodnym z kodowaniem bieżącego locale. W tym
+przypadku tymczasowy plik do edycji będzie zawierał prawdopodobnie jedynie
+znaki ASCII, w związku z czym edytor będzie mógł zinterpretować jego kodowanie
+jako kodowanie locale. To z kolei spowoduje, że po połączeniu z tymczasowym
+plikiem, wyjściowy będzie nieprawidłowy. Zgłoszenie błędu Debiana #297074
+zawiera przykładowy opis takiej sytuacji.
+.SH ZOBACZ TAKŻE
+.BR potool (1),
+.BR postats (1),
+.BR locale\ charmap (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.SH AUTOR
+Potool został napisany przez
+.nh
+Zbigniewa Chylę,
+.hy
+a obecnie jego opiekunem jest
+.nh
+Marcin Owsiany <porridge@debian.org>.

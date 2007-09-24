@@ -1,0 +1,131 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH POTOOL 1 "21 września 2007"
+.\" Proszę aktualizować datę przy zmianach treści
+.SH NAZWA
+potool \- program do manipulowania plikami po gettext
+.SH SKŁADNIA
+.B potool
+.RI PLIK1
+.RI [ " PLIK2 " ]
+.RI [\-f " f|nf|t|nt|nth|o|no"]
+.RI [\-n " ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
+.RI [\-s]
+.RI [\-c]
+.sp
+.B potool
+.RI \-h
+.SH OPIS
+.B potool
+pracuje w jednym z dwóch (na razie) trybów. W pierwszym wymaga podania jednej
+nazwy pliku i działa wówczas jak filtr. W drugim - powoduje
+.I zastąpienie
+tłumaczeń w pliku
+.RI PLIK1
+tłumaczeniami z pliku
+.RI PLIK2
+(zatem pierwszy plik jest plikiem bazowym, zaś drugi - naszym roboczym).
+.SH OPCJE
+.TP
+.B \-f filtr
+opisuje filtr, który określa, jakie wpisy w pliku .po powinny być
+.I zachowane
+(jest to filtr działający przy odczycie pliku). W drugim trybie pracy filtr
+uwzględniany jest tylko dla pliku
+.RI PLIK2
+(roboczego).
+Istniejące filtry:
+.br
+t   \- wpisy przetłumaczone,
+.br
+nt  \- wpisy nie przetłumaczone,
+.br
+nth \- wpisy nie przetłumaczone i nagłówek,
+.br
+f   \- wpisy 'fuzzy',
+.br
+nf  \- wpisy bez oznaczenia fuzzy,
+.br
+o   \- wpisy nieużywane (oznaczone przedrostkiem "#~ ")
+.br
+no  \- wpisy używane
+.br
+Filtry można na siebie nakładać, używając kilku opcji -f.
+.TP
+.B \-n filtr
+działa w obu trybach pracy tak samo i określa, jakie informacje w
+każdym z wpisów
+.I nie
+powinny być wyświetlane przy wypisywaniu ich przez program. Dozwolona jest
+dowolna liczba opcji -n. Dopuszczalne parametry:
+.br
+ctxt  \- nie wypisuj części 'ctxt'
+.br
+id    \- nie wypisuj części 'id'
+.br
+str   \- nie wypisuj części 'str'
+.br
+tr    \- nie wypisuj tłumaczeń (lecz pustą część 'str')
+.br
+ucmt  \- nie wypisuj komentarzy użytkownika
+.br
+pcmt  \- nie wypisuj komentarzy określających położenie w plikach
+.br
+scmt  \- nie wypisuj komentarzy specjalnych ('#, fuzzy, c-format, ...')
+.br
+dcmt  \- nie wyświetlaj komentarzy zarezerwowanych (głównie rozpoczynających
+się kropką - '#. ...'
+.br
+cmt   \- nie wyświetlaj żadnych komentarzy (połączenie ucmt, pcmt, scmt, dcmt)
+.br
+linf  \- usuwaj informację o numerach linii w komentarzach określających
+położenie w plikach.
+.sp
+Ostatni parametr powoduje zamianę numerów linii na '1'. Jest to przydatne w
+przypadku porównywania dwóch plików po lub pot przy pomocy
+.BR diff (1),
+gdyż w zazwyczaj jego wyjście jest zaciemnione wieloma informacjami o mało
+interesujących zmianach numerów linii.
+.TP
+.B \-s
+powoduje wypisanie tylko liczby wpisów zamiast ich treści
+.TP
+.B \-c
+kopiuje we wszystkich wpisach część 'id' do 'str' (być może zastępując tłumaczenie)
+.TP
+.B \-h
+wyświetla krótką informację na temat użycia.
+.SH PRZYKŁADY
+.TP
+potool x.po -s -ft
+wyświetla liczbę przetłumaczonych wpisów. Patrz także
+.BR postats (1).
+.TP
+potool x.po -nstr
+oczyszcza plik z tłumaczeń - a więc możemy zaczynać od zera ;)
+.TP
+potool x.po -ft && potool x.po -fnt
+wyświetla z pliku najpierw wpisy przetłumaczone, a następnie nie
+posiadające tłumaczenia (ze względu na pierwszy wpis nie zaleca
+się stosowania odwrotnej kolejności).
+Plik taki zawiera wszystkie informacje z x.po, natomiast braki w
+tłumaczeniach są skupione w jednym miejscu.
+.TP
+potool x.po -fnt > tmp.po && editor tmp.po && potool x.po tmp.po
+pozwala na proste dodawanie nowych tłumaczeń, bez przeglądania
+starych.
+.P
+Ostatnie dwa przykłady są zaimplementowane jako program
+.BR potooledit (1).
+.SH ZOBACZ TAKŻE
+.BR potooledit (1),
+.BR postats (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.SH AUTOR
+Potool został napisany przez
+.nh
+Zbigniewa Chylę,
+.hy
+a obecnie jego opiekunem jest 
+.hn
+Marcin Owsiany <porridge@debian.org>.

@@ -1,0 +1,15 @@
+potool is a program for manipulating gettext po files
+
+Copyright (C) 1999-2003 Zbigniew Chyla
+Copyright (C) 2000-2007 Marcin Owsiany
+
+The license is in the LICENSE file
+
+Development packages needed for building the program:
+	gcc, bison, flex, glib 2.x
+
+Documentation is available in manual page format:
+  poedit.1
+  potool.1
+  postats.1
+  change-po-charset.1

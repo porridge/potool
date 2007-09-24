@@ -1,0 +1,38 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH POSTATS 1 "24 września 2007"
+.\" Proszę aktualizować datę przy zmianach treści
+.SH NAZWA
+postats \- podsumowuje postęp tłumaczenia plików po gettext
+.SH SKŁADNIA
+.B postats
+.RI [ \-f ]
+.RI [ PLIK\ ... ]
+.SH OPIS
+.B postats
+to prosty skrypt powłoki, który wyświetla ilość (oraz stosunek)
+przetłumaczonych i nieprzetłumaczonych wpisów w podanych plikach po, używając
+do tego celu programów
+.BR potool (1)
+oraz
+.BR wc (1).
+Jeśli nie podano plików, domyślnie działa na wszystkich plikach z rozszerzeniem
+".po" w bieżącym katalogu. postats wyświetla także łączne podsumowanie
+wszystkich podanych plików.
+.SH OPCJE
+.TP
+.B \-f
+sprawia, że postats wyświetla także ilość wpisów "fuzzy".
+.SH ZOBACZ TAKŻE
+.BR potool (1),
+.BR wc (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTOR
+postats został napisany przez
+.nh
+Zbigniewa Chylę
+.ny
+a obecnie jego opiekunem jest
+.nh
+Marcin Owsiany <porridge@debian.org>.

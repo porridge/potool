@@ -1,34 +1,24 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.\" First parameter, NAME, should be all caps
-.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
-.\" other parameters are allowed: see man(7), man(1)
-.TH POTOOL 1 "May 11, 2007"
+.TH POTOOL 1 "September 21, 2007"
 .\" Please adjust this date whenever revising the manpage.
 .SH NAME
-potool \- program to aid editing gettext po files
+potool \- program for manipulating gettext po files
 .SH SYNOPSIS
 .B potool
 .RI FILENAME1
 .RI [ " FILENAME2 " ]
-.RI [\-f " f|nf|t|nt"]
+.RI [\-f " f|nf|t|nt|nth|o|no"]
 .RI [\-n " ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
 .RI [\-s]
 .RI [\-c]
-.RI [\-h]
 .sp
-.B poedit
-.RI [\-a]
-.RI file.po
-.sp
-.B postats
-.RI file.po
-.sp
-.B postats1
-.RI file.po
+.B potool
+.RI \-h
 .SH DESCRIPTION
 .B potool
 works in two (so far) modes. The first mode requires providing one
-filename, and works as a filter. In the second mode, the program replaces
+file name, and works as a filter. In the second mode, the program
+.I replaces
 the translations in
 .RI FILENAME1
 with the translations from
@@ -37,19 +27,33 @@ with the translations from
 .SH OPTIONS
 .TP
 .B \-f filter
-Determines which po file entries should be retained.
+Determines which po file entries should be
+.I retained.
+In the second mode, the filters are applied only to
+.RI FILENAME2
+(the working copy).
 Existing filters are:
 .br
-t  \- translated entries
+t   \- translated entries
 .br
-nt \- untranslated entries
+nt  \- untranslated entries
 .br
-f  \- fuzzy entries
+nth \- untranslated entries and the header
 .br
-nf \- entries that are not fuzzy
+f   \- fuzzy entries
+.br
+nf  \- entries that are not fuzzy
+.br
+o   \- obsolete entries
+.br
+no  \- non-obsolete entries
+.br
+It is possible to stack filters, by specifying multiple -f options.
 .TP
 .B \-n filter
-Determines which po file entries parts should not be retained.
+Determines which po file entries parts should
+.I not
+be retained. Any number of -n options is allowed. Valid parameters are:
 .br
 ctxt  \- don't write 'ctxt' parts
 .br
@@ -69,36 +73,53 @@ dcmt  \- don't write reserved comments (usually starting with a dot)
 .br
 cmt   \- don't write any comments
 .br
-linf  \- change source line numbers to '1'
+linf  \- change source line numbers to '1'.
+.sp
+The last parameter is useful when you need to compare two po or pot files using
+.BR diff (1)
+as it usually returns lots of unimportant line number changes otherwise.
 .TP
-.B -s
-Don't write the entries themselves, only count them.
+.B \-s
+Don't display the entries themselves, only their count.
 .TP
-.B -c
+.B \-c
 Overwrite all msgstrs with their msgids.
 .TP
-.B -h
+.B \-h
 Display short usage help.
 .SH EXAMPLES
-.BR poedit
-is a simple wrapper script for potool which helps
-editing po files. Use its -a flag to edit all messages, not only the
-untranslated ones.
-.sp
-.BR postats
-and
-.BR postats1
-display statistics about how much is already
-translated.
+.TP
+potool x.po -s -ft
+displays the number of translated entries. See also
+.BR postats (1).
+.TP
+potool x.po -nstr
+Deletes all translations - so you can start from scratch! :-)
+.TP
+potool x.po -ft && potool x.po -fnt
+displays firstly the translated and then the non-translated entries from file x.po
+(reverse order is not recommended because of the first "header" entry).
+The output contains all information from x.po, with the difference that
+untranslated entries are located together in a single place.
+.TP
+potool x.po -fnt > tmp.po && editor tmp.po && potool x.po tmp.po
+lets you easily add new translations, without looking at the already translated
+entries
+.P
+The last two examples are implemented as the
+.BR potooledit (1)
+program.
 .SH SEE ALSO
+.BR potooledit (1),
+.BR postats (1),
 .BR msgmerge (1),
 .BR msgfmt (1).
 .br
 .SH AUTHOR
-This manual page was written by
+Potool was written by
 .nh
-Marcin Owsiany <porridge@gnome.pl>,
+Zbigniew Chyla
 .hy
-using the description in Polish provided by
+and is now being maintained by
 .nh
-Zbigniew Chyla.
+Marcin Owsiany <porridge@debian.org>.

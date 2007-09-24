@@ -1,0 +1,32 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH CHANGE-PO-CHARSET 1 "September 21, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+change-po-charset \- change the charset value in content-type header of a gettext po file
+.SH SYNOPSIS
+.B change-po-charset
+.RI <charset>
+.RI FILENAME1
+.RI [ " FILENAME2 " ... ]
+.SH DESCRIPTION
+.B change-po-charset
+is a simple Perl script, which reads the specified file names, and prints them on
+standard output, making only the following modification. In the first msgstr
+string sequence it encounters, it changes the "charset" attribute of the
+Content-Type header to the charset specified as the first parameter.
+.sp
+Please note that it does not actually change any character encoding of the
+contents of the data. It is used by
+.BR potooledit (1)
+to fix the content-type header after it recodes the file with
+.BR iconv (1).
+.SH SEE ALSO
+.BR potooledit (1),
+.BR iconv (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTHOR
+change-po-charset was written by
+.nh
+Marcin Owsiany <porridge@debian.org>.

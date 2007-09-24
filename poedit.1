@@ -1,0 +1,74 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH POEDIT 1 "September 21, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+poedit \- program to aid editing gettext po files
+.SH SYNOPSIS
+.B poedit
+.RI [\-a]
+.RI [\-n]
+.RI <file.po>
+.sp
+.B potooledit
+.RI [\-a]
+.RI [\-n]
+.RI <file.po>
+.SH DESCRIPTION
+.B poedit
+is a shell script, which uses
+.BR potool (1),
+.BR iconv (1)
+and your favourite editor to help you edit gettext po files.
+.P
+It first retrieves only the untranslated entries from the file (or, if
+.BR \-a
+is specified, reorders the entries so that the translated ones are grouped
+separately from the untranslated ones) and puts them into a temporary file.
+Then recodes the file to the charmap of your current locale, and runs your
+favourite editor on the temporary file so you can add new translations. After
+you have finished, it recodes the file back to the original charset and merges
+the new translations back into the original file.
+.P
+.B poedit
+is also known as
+.B potooledit
+on Debian systems, to avoid a name clash with an unrelated program of the same
+name.
+.SH OPTIONS
+.TP
+.B \-a
+causes poedit to include already translated entries as well in the temporary
+file for editing (they are grouped separately, though).
+.br
+Without this option, only the untranslated entries (and the file header) are
+presented for editing.
+.TP
+.B \-n
+causes poedit not to do
+.I any
+charset recoding before nor after editing the file.
+.br
+You should only use this option if you know what you are doing. Be
+particularly careful when using this option (without
+.BR \-a )
+on files that are in an encoding incompatible with your locale's charmap. In
+that case, the intermediate file to be edited will probably only contain ASCII
+characters, which means your editor will be free to interpret this as your
+default locale encoding. This in turn, will make the file invalid when it is
+merged together with the already translated messages. See Debian bug #297074
+for an example of this happening.
+.SH SEE ALSO
+.BR potool (1),
+.BR postats (1),
+.BR locale\ charmap (1),
+.BR msgmerge (1),
+.BR msgfmt (1).
+.br
+.SH AUTHOR
+Poedit was written by
+.nh
+Zbigniew Chyla
+.hy
+and is now being maintained by
+.nh
+Marcin Owsiany <porridge@debian.org>.
