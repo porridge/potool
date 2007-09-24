@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$1" = "-f" ] then
+	fuzzy=1
+	shift
+fi
+
 if [ $# -gt 0 ]; then
 	files=$*
 else
@@ -16,9 +21,21 @@ fi
 		[ $? -eq 0 ] || { echo "Error: \"potool $a -ft -s\" failed"; continue ; }
 		all=`potool $a -s 2>/dev/null`
 		[ $? -eq 0 ] || { echo "Error: \"potool $a -s\" failed"; continue ; }
-		printf '%-24s - %5s/%-5s (%3s%%)  -%s\n' ${a} ${tr} ${all} $((${tr}*100/${all})) $(($all-$tr))
+		fuzzy=`potool $a -ff -s 2>/dev/null`
+		[ $? -eq 0 ] || { echo "Error: \"potool $a -ff -s\" failed"; continue ; }
+		if [ -n "$fuzzy" ] ; then
+		printf '%-24s - %5s/%3s/%-5s (%3s%%)  -%s\n' ${a} ${tr} ${fuzzy} ${all} $((${tr}*100/${all})) $(($all-$tr))
+		else
+		printf '%-24s - %5s/%-5s (%3s%%)  -%s\n'     ${a} ${tr}          ${all} $((${tr}*100/${all})) $(($all-$tr))
+		fi
 		ntr=$((${ntr}+${tr}))
+		nfuzzy=$((${nfuzzy}+${fuzzy}))
 		nall=$((${nall}+${all}))
 	done
-	[ $nall -gt 0 ] && printf '%-24s - %5s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
+	if [ -n "$fuzzy" ] ; then
+	[ $nall -gt 0 ] && printf '%-24s - %5s/%3s/%-5s (%s%%)  -%s\n' "x(100%)x" ${ntr} ${nfuzzy} ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
+	else
+	[ $nall -gt 0 ] && printf '%-24s - %5s/%-5s (%s%%)  -%s\n' "x(100%)x"     ${ntr}           ${nall} $((${ntr}*100/${nall})) $(($nall-$ntr))
+	fi
 ) | sort -nt'(' -k 1
+
