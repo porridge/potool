@@ -3,7 +3,6 @@
 #
 # Set up tmp file
 #
-
 POTMP=${TMPDIR:-${TMP:-/tmp}}
 if [ ! -d $POTMP -o ! -w $POTMP ]
 then
@@ -11,32 +10,76 @@ then
 	exit 1
 fi
 TMPFILE=`mktemp $POTMP/poedit.XXXXXX` || exit 1
+TMPFILE2=`mktemp $POTMP/poedit.XXXXXX` || exit 1
+
+function usage()
+{
+	echo "Usage: poedit [ -a ] [ -n ] <file.po>" >&2
+	exit 1
+}
 
 #
 # Check what msgs to include
 #
+INCLUDE_ALL_MSGS=no
+IGNORE_ENCODING=no
 
-if [ "$1" = "-a" ]
-then
-	INCLUDE_ALL_MSGS=yes
-	POFILE="$2"
-else
-	INCLUDE_ALL_MSGS=no
-	POFILE="$1"
-fi
+TEMP=`getopt -o an -n 'poedit' -- "$@"`
+if [ $? != 0 ] ; then usage ; fi
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+while true ; do
+	case "$1" in
+	-a)
+		INCLUDE_ALL_MSGS=yes
+		shift
+		;;
+	-n)
+		IGNORE_ENCODING=yes
+		shift
+		;;
+	--)
+		shift
+		break
+		;;
+	*)
+		echo "Internal error!" >&2
+		exit 1
+		;;
+	esac
+done
+
+POFILE="$1"
 
 #
 # Some sanity checks
 #
-
-if [ -z "$POFILE" -o ! -w "$POFILE" ]; then
-	echo 'edit what?!' 1>&2
+[ -z "$POFILE" ] && usage
+if ! [ -w "$POFILE" ] ;then
+	echo "$POFILE: not writable" >&2
 	exit 1
 fi
-
 if [ -z "$EDITOR" ]; then
 	echo '$EDITOR is not set1' 1>&2
 	exit 1
+fi
+
+#
+# Get file encoding
+#
+if [ $IGNORE_ENCODING = no ] ; then
+	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
+	if [ -z "$input_encoding" ] ; then
+		echo "Failed to retrieve encoding from the content-type header." 1>&2
+		echo "Make sure the file has a proper header before running $0" 1>&2
+		exit 1
+	fi
+	locale_encoding=$(locale charmap)
+	if [ -z "$locale_encoding" ] ; then
+		echo "Failed to retrieve the locale charmap. Something is very wrong." 1>&2
+		exit 1
+	fi
 fi
 
 #
@@ -47,16 +90,60 @@ if [ "$INCLUDE_ALL_MSGS" = "yes" ]
 then
 	potool "$POFILE" -ft > "$TMPFILE"
 	echo >> "$TMPFILE"
+	potool "$POFILE" -fnt >> "$TMPFILE"
 else
-	echo -n '' > "$TMPFILE"
+	potool "$POFILE" -fnth > "$TMPFILE"
 fi
-potool "$POFILE" -fnt >> "$TMPFILE"
+
+if [ $IGNORE_ENCODING = no ] ; then
+	#
+	# Recode the file so it is in the locale's encoding
+	#
+	iconv -f "$input_encoding" -t "$locale_encoding" < "$TMPFILE" > "$TMPFILE2"
+	if [ $? -ne 0 ]; then
+		echo "Recoding from [$input_encoding] to [$locale_encoding] failed." 1>&2
+		echo "Temp. file: " $TMPFILE 1>&2
+		exit 1
+	fi
+	
+	#
+	# Fix the charset information
+	#
+	change-po-charset "$locale_encoding" "$TMPFILE2" > "$TMPFILE"
+	if [ $? -ne 0 ]; then
+		echo "Failed to substitute the encoding attribute in the header." 1>&2
+		echo "Make sure the file has a proper header before running $0" 1>&2
+		exit 1
+	fi
+fi
 
 #
 # Run editor and update the file on success
 #
-
 $EDITOR "$TMPFILE"
+
+if [ $IGNORE_ENCODING = no ] ; then
+	#
+	# Change the charset information back
+	#
+	change-po-charset "$input_encoding" "$TMPFILE" > "$TMPFILE2"
+	if [ $? -ne 0 ]; then
+		echo "Failed to substitute the encoding attribute in the header." 1>&2
+		echo "Temp. file: " $TMPFILE 1>&2
+		exit 1
+	fi
+	
+	#
+	# Recode the file back to the original encoding
+	#
+	iconv -f "$locale_encoding" -t "$input_encoding" < "$TMPFILE2" > "$TMPFILE"
+	if [ $? -ne 0 ]; then
+		echo "Recoding back from [$locale_encoding] to [$input_encoding] failed." 1>&2
+		echo "Temp. file: " $TMPFILE 1>&2
+		exit 1
+	fi
+fi
+
 if [ $? -eq 0 ]; then
 	mv "$POFILE" "$POFILE~"
 	potool "$POFILE~" "$TMPFILE" > "$POFILE" 
