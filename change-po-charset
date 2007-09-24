@@ -1,0 +1,74 @@
+#!/usr/bin/perl
+# Changes the "charset" attribute value of the Content-Type header in a po file.
+# Does NOT actually change the encoding of the file.
+#
+# Copyright 2007 Marcin Owsiany
+# This script is public domain.
+use strict;
+use warnings;
+
+my $debug = 0;
+
+my $charset = shift @ARGV;
+die "Usage: change-po-charset <charset> [ file ] [ ... ]\n" unless defined $charset;
+
+# States
+my ($S_BLANK, $S_COMMENT, $S_MSGCTXT, $S_MSGID, $S_MSGSTR) = (1..10);
+
+# Possible regexes
+my %r = (
+	blank   => qr{^\s*$}oi,
+	comment => qr{^#}oi,
+	msgctxt => qr{^msgctxt\s+"(.*)"$}oi,
+	msgid   => qr{^msgid(_plural)?\s+".*"$}oi,
+	msgstr  => qr{^msgstr(\[\w+\])?\s+".*"$}oi,
+	string  => qr{^".*"$}oi,
+);
+my $subst = qr{^("Content-Type:.*charset=)(.*?)(( *;.*)?\\n")$}oi;
+
+# Current line
+my $l;
+# Current line number
+my $n = 0;
+# Curerrent state
+my $s = $S_BLANK;
+# Whether we've done the job
+my $done = 0;
+
+while ($l = <>) {
+	chomp $l;
+	my $orig_s = $s;
+	$n++;
+
+	if ($done) {
+		print $l, "\n";
+		next;
+	} elsif ($s == $S_BLANK && $l =~ $r{blank}) {
+	} elsif (($s == $S_BLANK || $s == $S_COMMENT) && $l =~ $r{comment}) {
+		$s = $S_COMMENT;
+	} elsif (($s == $S_BLANK || $s == $S_COMMENT) && $l =~ $r{msgctxt}) {
+		$s = $S_MSGCTXT;
+	} elsif (($s == $S_BLANK || $s == $S_COMMENT || $s == $S_MSGCTXT) && $l =~ $r{msgid}) {
+		$s = $S_MSGID;
+	} elsif ($s == $S_MSGID  && $l =~ $r{msgstr}) {
+		$s = $S_MSGSTR;
+	} elsif ($s == $S_MSGID  && ($l =~ $r{string} or $l =~ $r{msgid})) {
+	} elsif ($s == $S_MSGSTR && ($l =~ $r{string} or $l =~ $r{msgstr})) {
+	} elsif ($s == $S_MSGSTR && $l =~ $r{blank}) {
+		$s = $S_BLANK;
+	} else {
+		die "Unrecognized line num. $n in state $s: [$l], exiting";
+	}
+
+	if ($s == $S_MSGSTR) {
+		$done = $l =~ s{$subst}{${1}${charset}${3}}i;
+		print STDERR "CHANGED\n" if $debug and $done;
+	}
+
+	print $l, "\n";
+
+	printf STDERR "%03d: %s->%s: [%s]\n", $n, $orig_s, $s, $l if $debug;
+}
+
+exit($done ? 0 : 2);
+
