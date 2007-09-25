@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$1" = "-f" ] then
+if [ "$1" = "-f" ] ; then
 	fuzzy=1
 	shift
 fi
