@@ -1,0 +1,2 @@
+version=3
+http://marcin.owsiany.pl/potool.en.html potool/potool-(\d[^[:space:]]*)\.(?:tar\.gz|tgz|tar\.bz2|tbz|tbz2)

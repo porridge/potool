@@ -1,0 +1,123 @@
+potool (0.10-1) unstable; urgency=low
+
+  * New upstream version
+    - poedit now does some recoding, which hopefully Closes: #297074
+  * Added a watch file
+  * Fixed install to obey nostrip. Closes: #437784
+  * Install all the new manpages properly, get rid of symlinks
+  * Get rid of the README.PL, now that all documentation is propely in the
+    manpages
+  * Document that postats1 is gone in Debian.NEWS
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue, 25 Sep 2007 10:30:02 +0100
+
+potool (0.9-1) unstable; urgency=medium
+
+  * New upstream revision
+    - fixed plural entries support in filtering, merging and copying msgids
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue, 15 May 2007 14:19:04 +0100
+
+potool (0.8-1) unstable; urgency=medium
+
+  * New upstream revision
+    - fixed a segfault when filtering plural entries
+    - fixed some memleaks
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue, 15 May 2007 11:19:23 +0100
+
+potool (0.7-2) unstable; urgency=low
+
+  * Added a link to the new program's home page in description and copyright
+
+ -- Marcin Owsiany <porridge@debian.org>  Thu, 10 May 2007 22:28:45 +0100
+
+potool (0.7-1) unstable; urgency=low
+
+  * New upstream revision
+    - adds support for msgid_plural and msgstr[N]. Closes: #422820
+    - adds error checking to postats scripts. Closes: #422835
+  * Changed from patching Makefile to set some variables to setting them on
+    make command line in debian/rules
+
+ -- Marcin Owsiany <porridge@debian.org>  Thu, 10 May 2007 20:47:01 +0100
+
+potool (0.6-1) unstable; urgency=low
+
+  * New upstream revision
+    - updates sort invocation syntax in postats{,1}. Closes: #416165
+  * debian/copyright: updated project website address and added CVS repository
+    location
+  * Update Standards-Version to 3.7.2 (no changes needed)
+
+ -- Marcin Owsiany <porridge@debian.org>  Sun, 25 Mar 2007 16:20:59 +0100
+
+potool (0.5-2) unstable; urgency=low
+
+  * Use alternatives mechanism to provide /usr/bin/poedit, since poedit
+    package wants to change /usr/bin/poeditor to /usr/bin/poedit to match
+    upstream name. Closes: #206062
+  * Change dh compat mode to 4
+     - added recommended ${misc:Depends}
+  * Add conflicts with an old version of poedit, which used to provide
+    /usr/bin/poedit as a non-alternative
+
+ -- Marcin Owsiany <porridge@debian.org>  Sun, 24 Aug 2003 15:37:18 +0200
+
+potool (0.5-1) unstable; urgency=low
+
+  * New upstream release - doesn't choke on obsolete entries with comments.
+  * Pay attention to DEB_BUILD_OPTIONS
+  * Updated standards-version
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue,  1 Jul 2003 16:30:14 +0200
+
+potool (0.4-1) unstable; urgency=low
+
+  * New upstream release - fixes a bug which causes potool to use
+    the tags from old file, instead the new one.
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue,  8 Jan 2002 20:46:40 +0100
+
+potool (0.3-1) unstable; urgency=low
+
+  * New upstream release (added #include <stdlib.h>)
+  * Changed $EDITOR in poedit to $EDITCMD - otherwise sensible-editor loops.
+
+ -- Marcin Owsiany <porridge@debian.org>  Fri, 23 Nov 2001 01:41:26 +0100
+
+potool (0.2-2) unstable; urgency=low
+
+  * Changed my address in the manpage
+  * Update Standards-Version to 3.5.6.0
+
+ -- Marcin Owsiany <porridge@debian.org>  Mon,  5 Nov 2001 09:56:18 +0100
+
+potool (0.2-1) unstable; urgency=low
+
+  * New upstream release
+  * poedit now uses sensible-editor
+  * Added source-depends on debhelper
+  * Removed -d flag on compilation
+  * Updated Standards-Version to 3.5.3.0
+
+ -- Marcin Owsiany <porridge@debian.org>  Thu, 26 Apr 2001 04:04:28 +0200
+
+potool (0.1-2) unstable; urgency=low
+
+  * Changed my email to @debian.org
+  * Closed the wnpp bug. Closes: #79544
+
+ -- Marcin Owsiany <porridge@debian.org>  Mon, 22 Jan 2001 02:39:34 +0100
+
+potool (0.1-1) unstable; urgency=low
+
+  * Initial Release.
+  * This is my first Debian package.
+  * Reset $DESTDIR to empty value and modified $BINDIR in Makefile to
+    allow proper debianization
+  * Commented out poupdate installation - need to make it work for any
+    language first.
+
+ -- Marcin Owsiany <porridge@pandora.info.bielsko.pl>  Wed, 13 Dec 2000 00:39:40 +0100
+

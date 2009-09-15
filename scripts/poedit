@@ -60,10 +60,7 @@ if ! [ -w "$POFILE" ] ;then
 	echo "$POFILE: not writable" >&2
 	exit 1
 fi
-if [ -z "$EDITOR" ]; then
-	echo '$EDITOR is not set1' 1>&2
-	exit 1
-fi
+EDITCMD=sensible-editor
 
 #
 # Get file encoding
@@ -120,7 +117,7 @@ fi
 #
 # Run editor and update the file on success
 #
-$EDITOR "$TMPFILE"
+$EDITCMD "$TMPFILE"
 
 if [ $IGNORE_ENCODING = no ] ; then
 	#
@@ -156,6 +153,6 @@ if [ $? -eq 0 ]; then
 		echo "Temp. file: " $TMPFILE
 	fi
 else
-	echo $EDITOR exited abnormally, not updating the po file
+	echo $EDITCMD exited abnormally, not updating the po file
 	exit 1
 fi
