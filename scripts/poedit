@@ -1,16 +1,9 @@
 #!/bin/bash
 
 #
-# Set up tmp file
+# Set up temporary directory
 #
-POTMP=${TMPDIR:-${TMP:-/tmp}}
-if [ ! -d $POTMP -o ! -w $POTMP ]
-then
-	echo $POTMP does not exist or is not writable
-	exit 1
-fi
-TMPFILE=`mktemp $POTMP/poedit.XXXXXX` || exit 1
-TMPFILE2=`mktemp $POTMP/poedit.XXXXXX` || exit 1
+POTMP=`mktemp -d -t poedit.XXXXXX` || exit 1
 
 function usage()
 {
@@ -51,6 +44,8 @@ while true ; do
 done
 
 POFILE="$1"
+TMPFILE="$POTMP/`basename -- "$POFILE"`"
+TMPFILE2="$TMPFILE.tmp"
 
 #
 # Some sanity checks
@@ -159,3 +154,5 @@ else
 	echo $EDITOR exited abnormally, not updating the po file
 	exit 1
 fi
+
+rm -Rf "$POTMP"
