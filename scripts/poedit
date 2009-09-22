@@ -64,7 +64,7 @@ fi
 # Get file encoding
 #
 if [ $IGNORE_ENCODING = no ] ; then
-	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
+	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -m 1 -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
 	if [ -z "$input_encoding" ] ; then
 		echo "Failed to retrieve encoding from the content-type header." 1>&2
 		echo "Make sure the file has a proper header before running $0" 1>&2
