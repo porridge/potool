@@ -41,7 +41,7 @@ while ($l = <>) {
 	$n++;
 
 	if ($done) {
-		print $l, "\n";
+		print $l, "\n" or die "print failed: $!";
 		next;
 	} elsif ($s == $S_BLANK && $l =~ $r{blank}) {
 	} elsif (($s == $S_BLANK || $s == $S_COMMENT) && $l =~ $r{comment}) {
@@ -65,10 +65,11 @@ while ($l = <>) {
 		print STDERR "CHANGED\n" if $debug and $done;
 	}
 
-	print $l, "\n";
+	print $l, "\n" or die "print failed: $!";
 
 	printf STDERR "%03d: %s->%s: [%s]\n", $n, $orig_s, $s, $l if $debug;
 }
 
+close(STDOUT) or die "close failed: $!";
 exit($done ? 0 : 2);
 

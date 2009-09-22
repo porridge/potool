@@ -1,16 +1,9 @@
 #!/bin/bash
 
 #
-# Set up tmp file
+# Set up temporary directory
 #
-POTMP=${TMPDIR:-${TMP:-/tmp}}
-if [ ! -d $POTMP -o ! -w $POTMP ]
-then
-	echo $POTMP does not exist or is not writable
-	exit 1
-fi
-TMPFILE=`mktemp $POTMP/poedit.XXXXXX` || exit 1
-TMPFILE2=`mktemp $POTMP/poedit.XXXXXX` || exit 1
+POTMP=`mktemp -d -t poedit.XXXXXX` || exit 1
 
 function usage()
 {
@@ -51,6 +44,8 @@ while true ; do
 done
 
 POFILE="$1"
+TMPFILE="$POTMP/`basename -- "$POFILE"`"
+TMPFILE2="$TMPFILE.tmp"
 
 #
 # Some sanity checks
@@ -66,7 +61,7 @@ EDITCMD=sensible-editor
 # Get file encoding
 #
 if [ $IGNORE_ENCODING = no ] ; then
-	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
+	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -m 1 -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
 	if [ -z "$input_encoding" ] ; then
 		echo "Failed to retrieve encoding from the content-type header." 1>&2
 		echo "Make sure the file has a proper header before running $0" 1>&2
@@ -85,11 +80,11 @@ fi
 
 if [ "$INCLUDE_ALL_MSGS" = "yes" ]
 then
-	potool "$POFILE" -ft > "$TMPFILE"
+	potool "$POFILE" -ft > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 	echo >> "$TMPFILE"
-	potool "$POFILE" -fnt >> "$TMPFILE"
+	potool "$POFILE" -fnt >> "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnt >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 else
-	potool "$POFILE" -fnth > "$TMPFILE"
+	potool "$POFILE" -fnth > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnth > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 fi
 
 if [ $IGNORE_ENCODING = no ] ; then
@@ -99,7 +94,7 @@ if [ $IGNORE_ENCODING = no ] ; then
 	iconv -f "$input_encoding" -t "$locale_encoding" < "$TMPFILE" > "$TMPFILE2"
 	if [ $? -ne 0 ]; then
 		echo "Recoding from [$input_encoding] to [$locale_encoding] failed." 1>&2
-		echo "Temp. file: " $TMPFILE 1>&2
+		echo "Temp. file: $TMPFILE" 1>&2
 		exit 1
 	fi
 	
@@ -110,6 +105,7 @@ if [ $IGNORE_ENCODING = no ] ; then
 	if [ $? -ne 0 ]; then
 		echo "Failed to substitute the encoding attribute in the header." 1>&2
 		echo "Make sure the file has a proper header before running $0" 1>&2
+		echo "Temp. file: $TMPFILE2" 1>&2
 		exit 1
 	fi
 fi
@@ -118,6 +114,12 @@ fi
 # Run editor and update the file on success
 #
 $EDITCMD "$TMPFILE"
+editor_ret="$?"
+
+if [ $editor_ret -ne 0 ]; then
+	echo "$EDITCMD exited abnormally (code $editor_ret), not updating the po file" 1>&2
+	exit 1
+fi
 
 if [ $IGNORE_ENCODING = no ] ; then
 	#
@@ -136,23 +138,21 @@ if [ $IGNORE_ENCODING = no ] ; then
 	iconv -f "$locale_encoding" -t "$input_encoding" < "$TMPFILE2" > "$TMPFILE"
 	if [ $? -ne 0 ]; then
 		echo "Recoding back from [$locale_encoding] to [$input_encoding] failed." 1>&2
-		echo "Temp. file: " $TMPFILE 1>&2
+		echo "Temp. file: " $TMPFILE2 1>&2
 		exit 1
 	fi
 fi
 
+mv "$POFILE" "$POFILE~" || { echo "Failed to rename \"$POFILE\" to \"$POFILE~\""; exit 1; }
+potool "$POFILE~" "$TMPFILE" > "$POFILE"
 if [ $? -eq 0 ]; then
-	mv "$POFILE" "$POFILE~"
-	potool "$POFILE~" "$TMPFILE" > "$POFILE" 
-	if [ $? -eq 0 ]; then
-		printf "Before: %s/%s\n" `potool -ft -s "$POFILE~"` `potool -s "$POFILE~"` 
-		printf "After:  %s/%s\n" `potool -ft -s "$POFILE"` `potool -s "$POFILE"` 
-		rm -f "$POFILE~" "$TMPFILE"
-	else
-		mv -f "$POFILE~" "$POFILE"
-		echo "Temp. file: " $TMPFILE
-	fi
+	printf "Before: %s/%s\n" `potool -ft -s "$POFILE~"` `potool -s "$POFILE~"`
+	printf "After:  %s/%s\n" `potool -ft -s "$POFILE"` `potool -s "$POFILE"`
+	rm -f "$POFILE~" "$TMPFILE"
 else
-	echo $EDITCMD exited abnormally, not updating the po file
+	mv -f "$POFILE~" "$POFILE"
+	echo "Merging $POFILE with $TMPFILE failed" >&2
 	exit 1
 fi
+
+rm -Rf "$POTMP"

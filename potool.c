@@ -1,13 +1,17 @@
 /*
  * potool is a program aiding editing of po files
  * Copyright (C) 1999-2002 Zbigniew Chyla
+ * Copyright (C) 2007-2009 Marcin Owsiany
  *
  * see LICENSE for licensing info
  */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <getopt.h>
+#include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "i18n.h"
@@ -272,6 +276,18 @@ enum {
 	SEP2 = '\t'
 };
 
+int potool_printf(char *format, ...)
+{
+	va_list ap;
+	int ret;
+	va_start(ap, format);
+	ret = vprintf(format, ap);
+	if (ret < 0)
+		g_error(_("printf() failed, returning %d: %s"), ret, strerror(errno));
+	va_end(ap);
+	return ret;
+}
+
 static void
 print_multi_line (const char *s, int start_offset, const char *prefix)
 {
@@ -285,11 +301,11 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 	eol_ptr = strstr (s, "\\n");
 	if ((eol_ptr == NULL || (eol_ptr - s + 2 == slen))
 	    && slen < (RMARGIN - 2 - start_offset)) {
-		printf ("\"%s\"\n", s);
+		potool_printf ("\"%s\"\n", s);
 		return;
 	}
 
-	printf ("\"\"\n");
+	potool_printf ("\"\"\n");
 	prefix_len = strlen (prefix);
 	has_final_eol = strcmp (s + slen - 2, "\\n") == 0;
 	lines = g_strsplit (s, "\\n", 0);
@@ -302,13 +318,14 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 		if (*ln[0] == '\0' && *(ln + 1) == NULL)
 			continue;
 #endif
-		printf ("%s\"", prefix);
+		potool_printf ("%s\"", prefix);
 		line_has_eol = has_final_eol || *(ln + 1) != NULL;
 		offset = prefix_len;
 		cur = *ln;
 		do {
 			int word_len = 0;
 			int eol_len;
+			int ret;
 
 			while (cur[word_len] != SEP1 && cur[word_len] != SEP2 &&
 			       cur[word_len] != '\0')
@@ -323,22 +340,23 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 				eol_len = 0;
 			}
 			if (offset + word_len + eol_len > max_len) {
-				printf ("\"\n%s\"", prefix);
+				potool_printf ("\"\n%s\"", prefix);
 				offset = prefix_len;
 			}
-			fwrite (cur, 1, word_len, stdout);
+			if ((ret = fwrite(cur, 1, word_len, stdout)) != word_len)
+				g_error(_("fwrite() failed, returned %d instead of %d: %s"), ret, word_len, strerror(errno));
 			offset += word_len;
 			cur += word_len;
 		} while (*cur != '\0');
 
 		if (line_has_eol) {
 			if (offset + 2 > max_len) {
-				printf ("\"\n%s\"\\n", prefix);
+				potool_printf ("\"\n%s\"\\n", prefix);
 			} else {
-				printf ("\\n");
+				potool_printf ("\\n");
 			}
 		}
-		printf ("\"\n");
+		potool_printf ("\"\n");
 	}
 	g_strfreev (lines);
 }
@@ -350,18 +368,18 @@ write_msgstr (char *prefix, char *str, GSList *strn, po_write_modes mode)
 
 	if (!(mode & NO_TRANSLATION)) {
 		if (str) {
-			printf ("%smsgstr ", prefix);
+			potool_printf ("%smsgstr ", prefix);
 			print_multi_line (str, 7 + prefix_len, prefix);
 		} else {
 			GSList *x;
 			for (x = strn; x != NULL; x = x->next) {
 				MsgStrX *m = x->data;
-				printf ("%smsgstr[%d] ", prefix, m->n);
+				potool_printf ("%smsgstr[%d] ", prefix, m->n);
 				print_multi_line (m->str, 10 + prefix_len, prefix);
 			}
 		}
 	} else {
-		printf ("%smsgstr \"\"\n", prefix);
+		potool_printf ("%smsgstr \"\"\n", prefix);
 	}
 }
 
@@ -376,18 +394,18 @@ po_write (PoFile *pof, po_write_modes mode)
 
 		if (!(mode & NO_STD_COMMENT)) {
 			for (ll = po->comments.std; ll != NULL; ll = ll->next) {
-				printf ("#%s\n", (char *) ll->data);
+				potool_printf ("#%s\n", (char *) ll->data);
 			}
 		}
 		if (!(mode & NO_RES_COMMENT)) {
 			for (ll = po->comments.res; ll != NULL; ll = ll->next) {
-				printf ("#%s\n", (char *) ll->data);
+				potool_printf ("#%s\n", (char *) ll->data);
 			}
 		}
 		if (!(mode & NO_POS_COMMENT)) {
 			if (!(mode & NO_LINF)) {
 				for (ll = po->comments.pos; ll != NULL; ll = ll->next) {
-					printf ("#:%s\n", (char *) ll->data);
+					potool_printf ("#:%s\n", (char *) ll->data);
 				}
 			} else {
 				for (ll = po->comments.pos; ll != NULL; ll = ll->next) {
@@ -406,25 +424,25 @@ po_write (PoFile *pof, po_write_modes mode)
 						}
 					}
 					*l = '\0';
-					printf ("#:%s\n", s);
+					potool_printf ("#:%s\n", s);
 					g_free (s);
 				}
 			}
 		}
 		if (!(mode & NO_SPEC_COMMENT)) {
 			for (ll = po->comments.spec; ll != NULL; ll = ll->next) {
-				printf ("#,%s\n", (char *) ll->data);
+				potool_printf ("#,%s\n", (char *) ll->data);
 			}
 		}
 		if ((!(mode & NO_CTX)) && po->ctx) {
-			printf ("msgctxt ");
+			potool_printf ("msgctxt ");
 			print_multi_line (po->ctx, 8, "");
 		}
 		if (!(mode & NO_ID)) {
-			printf ("msgid ");
+			potool_printf ("msgid ");
 			print_multi_line (po->id, 6, "");
 			if (po->id_plural) {
-				printf ("msgid_plural ");
+				potool_printf ("msgid_plural ");
 				print_multi_line (po->id_plural, 13, "");
 			}
 		}
@@ -433,12 +451,12 @@ po_write (PoFile *pof, po_write_modes mode)
 		}
 
 		if (l->next != NULL) {
-			printf ("\n");
+			potool_printf ("\n");
 		}
 	}
 
 	if (pof->obsolete_entries != NULL) {
-		printf ("\n");
+		potool_printf ("\n");
 	}
 
 	for (l = pof->obsolete_entries; l != NULL; l = l->next) {
@@ -447,25 +465,25 @@ po_write (PoFile *pof, po_write_modes mode)
 
 		if (!(mode & NO_STD_COMMENT)) {
 			for (ll = po->comments.std; ll != NULL; ll = ll->next) {
-				printf ("#%s\n", (char *) ll->data);
+				potool_printf ("#%s\n", (char *) ll->data);
 			}
 		}
 		if (!(mode & NO_SPEC_COMMENT)) {
 			for (ll = po->comments.spec; ll != NULL; ll = ll->next) {
-				printf ("#,%s\n", (char *) ll->data);
+				potool_printf ("#,%s\n", (char *) ll->data);
 			}
 		}
 
 		if ((!(mode & NO_CTX)) && po->ctx) {
-			printf ("#~ msgctxt ");
+			potool_printf ("#~ msgctxt ");
 			print_multi_line (po->ctx, 11, "#~ ");
 		}
 
 		if (!(mode & NO_ID)) {
-			printf ("#~ msgid ");
+			potool_printf ("#~ msgid ");
 			print_multi_line (po->id, 9, "#~ ");
 			if (po->id_plural) {
-				printf ("#~ msgid_plural ");
+				potool_printf ("#~ msgid_plural ");
 				print_multi_line (po->id_plural, 16, "#~ ");
 			}
 		}
@@ -474,7 +492,7 @@ po_write (PoFile *pof, po_write_modes mode)
 		}
 
 		if (l->next != NULL) {
-			printf ("\n");
+			potool_printf ("\n");
 		}
 	}
 }
@@ -534,11 +552,11 @@ main (int argc, char **argv)
 	while ((c = getopt (argc, argv, "f:n:sch")) != EOF) {
 		switch (c) {
 			case 'h' :
-				printf (_(
+				fprintf (stderr, _(
 				"Usage: %s -i FILENAME1 [FILENAME2] [FITERS] [-s] [OUTPUT_OPTIONS] [-h]\n"
 				"\n"
 				), argv[0]);
-				exit (0);
+				exit (EXIT_SUCCESS);
 				break;
 			case 'n' :
 				if (strcmp (optarg, "ctxt") == 0) {
@@ -613,7 +631,7 @@ main (int argc, char **argv)
 		po_apply_filters (pof, ifilters);
 
 		if (istats) {
-			printf (_("%d\n"), g_slist_length (pof->entries));
+			potool_printf (_("%d\n"), g_slist_length (pof->entries));
 		} else {
 			if (copy_msgid) {
 				po_copy_msgid (pof);
@@ -638,6 +656,8 @@ main (int argc, char **argv)
 		po_free (bpof);
 		po_free (pof);
 	}
+	if (fflush(stdout) != 0)
+		g_error(_("fflush(stdout) failed: %s"), strerror(errno));
 
 	return 0;
 }

@@ -1,0 +1,4 @@
+lex.po.[co]
+po.tab.[cho]
+potool.o
+potool
