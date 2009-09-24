@@ -9,10 +9,9 @@ Package: potool
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: poedit (<< 1.0.3-2)
+Homepage: http://marcin.owsiany.pl/potool-page
 Description: A program to aid manipulation of gettext po files
  This package contains the filter program 'potool', as well
  as a few helper scripts:
   poedit  - helps editing of po files in your favourite editor
   postats - prints statistics of how much of a file is translated
- .
-  Homepage: http://marcin.owsiany.pl/potool.en.html
