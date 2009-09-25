@@ -5,7 +5,7 @@
 
 #export DH_VERBOSE=1
 
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
 	CFLAGS += -O2
@@ -18,13 +18,16 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	$(MAKE) DESTDIR= BINDIR=/usr/bin CFLAGS='$$(GLIB_INCLUDE) -g -Wall $(CFLAGS)'
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	cd tests && bash test
+endif
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
-	-$(MAKE) clean
+	$(MAKE) clean
 	dh_clean
 
 install: build
@@ -45,12 +48,12 @@ binary-arch: build install
 	dh_movefiles
 	dh_installchangelogs 
 	dh_installdocs
-	dh_installdirs usr/share/man/man1 usr/share/man/pl_PL.UTF-8/man1
+	dh_installdirs usr/share/man/man1 usr/share/man/pl/man1
 	dh_installman potool.1 change-po-charset.1 postats.1
 	install poedit.1 debian/potool/usr/share/man/man1/potooledit.1
 	for m in potool change-po-charset postats ; do \
-	 install $${m}.pl.1 debian/potool/usr/share/man/pl_PL.UTF-8/man1/$${m}.1 ; done
-	install poedit.pl.1 debian/potool/usr/share/man/pl_PL.UTF-8/man1/potooledit.1
+	 install $${m}.pl.1 debian/potool/usr/share/man/pl/man1/$${m}.1 ; done
+	install poedit.pl.1 debian/potool/usr/share/man/pl/man1/potooledit.1
 	dh_installchangelogs
 	dh_strip
 	dh_compress

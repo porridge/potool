@@ -6,8 +6,16 @@ potool (0.11-1) unstable; urgency=medium
     cleanup. Closes: #533833, #533835
   * Includes changes to check return codes/values from calls which can write
     to the filesystem. Closes: #546811
+  * Policy version update:
+     - use filter function to parse DEB_BUILD_OPTIONS (elements are now
+       whitespace-separated)
+     - run the test suite after building
+     - change the localized manpages path to not include country and encoding
+     - do not ignore make clean errors
+     - update the homepage URL and move it from the description to the
+       dedicated header
 
- -- Marcin Owsiany <porridge@debian.org>  Tue, 22 Sep 2009 19:32:59 +0100
+ -- Marcin Owsiany <porridge@debian.org>  Fri, 25 Sep 2009 10:24:49 +0100
 
 potool (0.10-1) unstable; urgency=low
 
