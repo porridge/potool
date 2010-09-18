@@ -1,3 +1,12 @@
+potool (0.11-2) unstable; urgency=high
+
+  * Update Polish manpage path in update-alternatives invocation. The wrong
+    path (apart from making the Polish manpage version unavailable via 'poedit'
+    name) caused postinst failures with lenny's dpkg version, which made it a
+    grave bug. Closes: #597321
+
+ -- Marcin Owsiany <porridge@debian.org>  Sat, 18 Sep 2010 18:14:37 +0100
+
 potool (0.11-1) unstable; urgency=medium
 
   * New version. Upstream and Debian are now maintained in the same Git

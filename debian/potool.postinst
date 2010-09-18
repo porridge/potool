@@ -16,8 +16,8 @@ register_alternatives()
 	--install /usr/bin/poedit poedit /usr/bin/potooledit 80 \
        	--slave /usr/share/man/man1/poedit.1.gz             poedit.1.gz    \
 		/usr/share/man/man1/potooledit.1.gz                        \
-       	--slave /usr/share/man/pl_PL.UTF-8/man1/poedit.1.gz poedit.pl.1.gz \
-		/usr/share/man/pl_PL.UTF-8/man1/potooledit.1.gz
+       	--slave /usr/share/man/pl/man1/poedit.1.gz poedit.pl.1.gz \
+		/usr/share/man/pl/man1/potooledit.1.gz
 }
 
 case "$1" in
