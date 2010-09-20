@@ -5,4 +5,5 @@
 /build-stamp
 /debian/files
 /debian/potool.substvars
+/debian/potool.debhelper.log
 /debian/potool
