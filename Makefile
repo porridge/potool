@@ -1,12 +1,12 @@
 #
 # potool is a program aiding editing of po files
 # Copyright (C) 1999-2002 Zbigniew Chyla
-# Copyright (C) 2000-2007 Marcin Owsiany
+# Copyright (C) 2000-2011 Marcin Owsiany
 #
 # see LICENSE for licensing info
 #
 
-VER = 0.10
+VER = 0.12
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
@@ -17,16 +17,13 @@ GTAR = tar
 GLIB_LIB = $(shell pkg-config --libs glib-2.0)
 GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
 CFLAGS = $(GLIB_INCLUDE) -g -Wall -O2
-LDFLAGS = $(GLIB_LIB)
+LDLIBS = $(GLIB_LIB)
 
 THINGS  = potool po.tab lex.po
 OBJS    = $(addsuffix .o, $(THINGS))
 SOURCES = $(addsuffix .c, $(THINGS))
 
 potool: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
-
-$(OBJS): %.o : %.c
 
 po.tab.o lex.po.c lex.po.o: po-gram.h common.h
 
