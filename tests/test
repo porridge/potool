@@ -1,3 +1,4 @@
+set -e
 for dir in 1
 do
 	echo TESTING $dir/no filter
