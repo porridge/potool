@@ -1,4 +1,5 @@
 %option noyywrap
+%option noinput
 %option nounput
 %option yylineno
 
