@@ -58,3 +58,10 @@ msgstr[2] ""
 msgid "%d oje"
 msgid_plural "%d ojes"
 msgstr[0] ""
+
+#~ msgid "unknown"
+#~ msgstr "nieznany"
+
+#, fuzzy
+#~ msgid "Load OEM supported drivers from driver injection disk?"
+#~ msgstr "Zaladowac sterowniki CD-ROMu z urzadzenia zewnetrznego?"

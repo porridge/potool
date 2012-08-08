@@ -33,13 +33,6 @@ typedef struct {
 } PoEntry;
 
 typedef struct {
-	PoComments comments;
-	gboolean is_fuzzy, is_c_format;
-	char *ctx, *id, *id_plural, *str;
-	GSList *msgstrxs;
-} PoObsoleteEntry;
-
-typedef struct {
 	GSList *entries, *obsolete_entries;
 } PoFile;
 

@@ -98,25 +98,10 @@ po_entry_free (PoEntry *po)
 }
 
 void
-po_obsolete_entry_free (PoObsoleteEntry *po)
-{
-	g_slist_free_custom (po->comments.std, g_free);
-	g_slist_free_custom (po->comments.pos, g_free);
-	g_slist_free_custom (po->comments.res, g_free);
-	g_slist_free_custom (po->comments.spec, g_free);
-	g_slist_free_custom (po->msgstrxs, msgstrx_free);
-	g_free (po->id);
-	g_free (po->id_plural);
-	g_free (po->ctx);
-	g_free (po->str);
-	g_free (po);
-}
-
-void
 po_free (PoFile *pof)
 {
 	g_slist_free_custom (pof->entries, po_entry_free);
-	g_slist_free_custom (pof->obsolete_entries, po_obsolete_entry_free);
+	g_slist_free_custom (pof->obsolete_entries, po_entry_free);
 	g_free (pof);
 }
 
@@ -194,6 +179,17 @@ po_apply_filter (PoFile *pof, po_filter_func *filter)
 	}
 	g_slist_free (pof->entries);
 	pof->entries = g_slist_reverse (npo_list);
+
+	for (npo_list = NULL, l = pof->obsolete_entries; l != NULL; l = l->next) {
+		if (filter ((PoEntry *) l->data)) {
+			npo_list = g_slist_prepend (npo_list, l->data);
+		} else {
+			po_entry_free (l->data);
+		}
+	}
+	g_slist_free (pof->obsolete_entries);
+	pof->obsolete_entries = g_slist_reverse (npo_list);
+
 }
 
 typedef enum {
@@ -230,7 +226,7 @@ po_apply_filters (PoFile *pof, PoFilters filters)
 		pof->entries = NULL;
 	}
 	if ((filters & NOT_OBSOLETE_FILTER) != 0) {
-		g_slist_free_custom (pof->obsolete_entries, po_obsolete_entry_free);
+		g_slist_free_custom (pof->obsolete_entries, po_entry_free);
 		pof->obsolete_entries = NULL;
 	}
 }
@@ -460,7 +456,7 @@ po_write (PoFile *pof, po_write_modes mode)
 	}
 
 	for (l = pof->obsolete_entries; l != NULL; l = l->next) {
-		PoObsoleteEntry *po = l->data;
+		PoEntry *po = l->data;
 		GSList *ll;
 
 		if (!(mode & NO_STD_COMMENT)) {

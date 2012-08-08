@@ -31,7 +31,6 @@ static char *concat_strings (GSList *slist);
 	char *str_val;
 	GSList *gslist_val;
 	PoEntry *entry_val;
-	PoObsoleteEntry *obsolete_entry_val;
 	PoComments comments_val;
 	MsgStrX *msgstrx_val;
 }
@@ -58,7 +57,7 @@ static char *concat_strings (GSList *slist);
 %type <msgstrx_val> obsolete_msgstr_x
 %type <comments_val> comments
 %type <entry_val> msg
-%type <obsolete_entry_val> obsolete_msg
+%type <entry_val> obsolete_msg
 
 %start translation_unit
 %%
@@ -254,7 +253,7 @@ obsolete_msg
 	{
 		GSList *l;
 
-		$$ = g_new (PoObsoleteEntry, 1);
+		$$ = g_new (PoEntry, 1);
 		$$->ctx = $2;
 		$$->id = concat_strings ($4);
 		$$->id_plural = NULL;
@@ -279,7 +278,7 @@ obsolete_msg
 	{
 		GSList *l;
 
-		$$ = g_new (PoObsoleteEntry, 1);
+		$$ = g_new (PoEntry, 1);
 		$$->ctx = $2;
 		$$->id = concat_strings ($4);
 		$$->id_plural = concat_strings ($6);
