@@ -52,12 +52,16 @@ TMPFILE2="$TMPFILE.tmp"
 # Some sanity checks
 #
 [ -z "$POFILE" ] && usage
-if ! [ -w "$POFILE" ] ;then
+if ! [ -w "$POFILE" ]; then
 	echo "$POFILE: not writable" >&2
 	exit 1
 fi
-if [ -z "$EDITOR" ]; then
-	echo '$EDITOR is not set1' 1>&2
+if [ -n "$EDITOR" ]; then
+	EDITCMD="$EDITOR"
+elif which sensible-editor >/dev/null 2>&1; then
+	EDITCMD="sensible-editor"
+else
+	echo '$EDITOR is not set, and sensible-editor is not available' >&2
 	exit 1
 fi
 
@@ -117,11 +121,11 @@ fi
 #
 # Run editor and update the file on success
 #
-$EDITOR "$TMPFILE"
+$EDITCMD "$TMPFILE"
 editor_ret="$?"
 
 if [ $editor_ret -ne 0 ]; then
-	echo "$EDITOR exited abnormally (code $editor_ret), not updating the po file" 1>&2
+	echo "$EDITCMD exited abnormally (code $editor_ret), not updating the po file" 1>&2
 	exit 1
 fi
 
