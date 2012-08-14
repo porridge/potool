@@ -1,3 +1,15 @@
+potool (0.14-1) unstable; urgency=low
+
+  * New version
+    - documents the fact that text gets reformatted. Closes: #602884
+    - adds support for "previous" strings. Closes: #641949
+    - uses a more sane error handling function, which does not dump core.
+      Closes: #567940
+    - directly handles sensible-editor in poedit, making the debian change
+      obsolete
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue, 14 Aug 2012 21:09:21 +0200
+
 potool (0.12-1) unstable; urgency=low
 
   * New version.
