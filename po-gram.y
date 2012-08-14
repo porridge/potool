@@ -26,6 +26,8 @@ static char *concat_strings (GSList *slist);
 
 %}
 
+%error-verbose
+
 %union {
 	int int_val;
 	char *str_val;
@@ -483,7 +485,7 @@ void
 poerror (char *s)
 {
 	fflush (stdout);
-	g_error (_("Parse error at line %d\n"), polineno);
+	g_error (_("Parse error at line %d: %s\n"), polineno, s);
 }
 
 PoFile *
