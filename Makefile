@@ -48,7 +48,7 @@ dist: clean
 	cd ..; \
 	 rm -f potool-$(VER).tar{,.gz} potool-$(VER); \
 	 ln -s potool potool-$(VER); \
-	 $(GTAR) --exclude='*/CVS' --exclude='*/.cvsignore' --owner=root --group=root -hcf potool-$(VER).tar potool-$(VER) && \
+	 $(GTAR) --exclude='*/.git*' --owner=root --group=root -hcf potool-$(VER).tar potool-$(VER) && \
 	 gzip -9 potool-$(VER).tar
 
 check: potool
