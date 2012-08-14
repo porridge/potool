@@ -17,6 +17,7 @@
 #include "i18n.h"
 #include "po-gram.h"
 #include "po.tab.h"
+#include "common.h"
 
 static YY_BUFFER_STATE buf_state = (YY_BUFFER_STATE) 0;
 static FILE *buf_file = NULL;
@@ -28,7 +29,7 @@ po_scan_open_file (char *fn)
 		g_error (_("Trying to scan two files!"));
 	}
 	if ((buf_file = fopen (fn, "r")) == NULL) {
-		g_error (_("Can't open input file: %s\n"), fn);
+		po_error (_("Can't open input file: %s\n"), fn);
 	}
 	buf_state = yy_create_buffer (buf_file, YY_BUF_SIZE);
 	yy_switch_to_buffer (buf_state);

@@ -486,7 +486,7 @@ void
 poerror (char *s)
 {
 	fflush (stdout);
-	g_error (_("Parse error at line %d: %s\n"), polineno, s);
+	po_error (_("Parse error at line %d: %s\n"), polineno, s);
 }
 
 PoFile *

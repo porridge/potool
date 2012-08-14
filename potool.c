@@ -24,6 +24,16 @@
 typedef gboolean po_filter_func (PoEntry *);
 
 void
+po_error(const gchar *format, ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	g_logv(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, format, ap);
+	va_end(ap);
+	exit(1);
+}
+
+void
 msgstrx_free(MsgStrX *msgstrx)
 {
 	g_free (msgstrx->str);
@@ -288,7 +298,7 @@ int potool_printf(char *format, ...)
 	va_start(ap, format);
 	ret = vprintf(format, ap);
 	if (ret < 0)
-		g_error(_("printf() failed, returning %d: %s"), ret, strerror(errno));
+		po_error(_("printf() failed with code %d: %s"), ret, strerror(errno));
 	va_end(ap);
 	return ret;
 }
@@ -349,7 +359,7 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 				offset = prefix_len;
 			}
 			if ((ret = fwrite(cur, 1, word_len, stdout)) != word_len)
-				g_error(_("fwrite() failed, returned %d instead of %d: %s"), ret, word_len, strerror(errno));
+				po_error(_("fwrite() failed, returned %d instead of %d: %s"), ret, word_len, strerror(errno));
 			offset += word_len;
 			cur += word_len;
 		} while (*cur != '\0');
@@ -614,7 +624,7 @@ main (int argc, char **argv)
 				} else if (strcmp (optarg, "linf") == 0) {
 					write_mode |= NO_LINF;
 				} else {
-					g_error (_("Unknown parameter for -n option!"));
+					po_error (_("Unknown parameter for -n option!"));
 				}
 				break;
 			case 's' :
@@ -639,14 +649,14 @@ main (int argc, char **argv)
 				} else if (strcmp (optarg, "no") == 0) {
 					ifilters |= NOT_OBSOLETE_FILTER;
 				} else {
-					g_error (_("Unknown filter!"));
+					po_error (_("Unknown filter \"%s\"!"), optarg);
 				}
 				break;
 			case ':' :
-				g_error (_("Invalid parameter!"));
+				po_error (_("Invalid parameter!"));
 				break;
 			case '?' :
-				g_error (_("Invalid option!"));
+				po_error (_("Invalid option!"));
 				break;
 			default :
 				g_assert_not_reached ();
@@ -654,7 +664,7 @@ main (int argc, char **argv)
 	}
 
 	if (optind >= argc) {
-		g_error (_("Input file not specified!"));
+		po_error (_("Input file not specified!"));
 	}
 	if (argc - optind == 1) {
 		PoFile *pof;
@@ -690,7 +700,7 @@ main (int argc, char **argv)
 		po_free (pof);
 	}
 	if (fflush(stdout) != 0)
-		g_error(_("fflush(stdout) failed: %s"), strerror(errno));
+		po_error(_("fflush(stdout) failed: %s"), strerror(errno));
 
 	return 0;
 }
