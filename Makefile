@@ -35,6 +35,7 @@ po.tab.c: po-gram.y
 	bison -ppo -bpo -d $<
 
 install: potool
+	$(INSTALL) -d $(BINDIR)
 	$(BININSTALL) potool $(BINDIR)
 	$(INSTALL) scripts/poedit $(BINDIR)
 	$(INSTALL) scripts/postats $(BINDIR)
