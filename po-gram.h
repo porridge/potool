@@ -1,6 +1,7 @@
 /*
  * potool is a program aiding editing of po files
  * Copyright (C) 1999-2002 Zbigniew Chyla
+ * Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
  *
  * see LICENSE for licensing info
  */

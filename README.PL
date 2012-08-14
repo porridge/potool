@@ -1,6 +1,6 @@
 potool jest programem wspomagaj±cym edycjê plików po
 Copyright (C) 1999-2003 Zbigniew Chyla
-Copyright (C) 2000-2007 Marcin Owsiany
+Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
 
 Licencja znajduje siê w pliku LICENSE
 

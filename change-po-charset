@@ -2,7 +2,7 @@
 # Changes the "charset" attribute value of the Content-Type header in a po file.
 # Does NOT actually change the encoding of the file.
 #
-# Copyright 2007 Marcin Owsiany
+# Copyright 2007-2009 Marcin Owsiany
 # This script is public domain.
 use strict;
 use warnings;
