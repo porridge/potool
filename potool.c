@@ -68,6 +68,10 @@ po_entry_copy (PoEntry *ret, PoEntry *po)
 	ret->comments.spec = g_slist_copy (po->comments.spec);
 	po_list_str_dup(ret->comments.spec);
 
+	ret->previous.ctx = g_strdup (po->previous.ctx);
+	ret->previous.id = g_strdup (po->previous.id);
+	ret->previous.id_plural = g_strdup (po->previous.id_plural);
+
 	ret->is_fuzzy = po->is_fuzzy;
 	ret->is_c_format = po->is_c_format;
 
@@ -90,6 +94,10 @@ po_entry_free (PoEntry *po)
 	g_slist_free_custom (po->comments.res, g_free);
 	g_slist_free_custom (po->comments.spec, g_free);
 	g_slist_free_custom (po->msgstrxs, msgstrx_free);
+	g_free (po->previous.id);
+	g_free (po->previous.id_plural);
+	g_free (po->previous.ctx);
+
 	g_free (po->id);
 	g_free (po->id_plural);
 	g_free (po->ctx);
@@ -263,8 +271,9 @@ typedef enum {
 	NO_POS_COMMENT  = 1 << 4,
 	NO_SPEC_COMMENT = 1 << 5,
 	NO_RES_COMMENT  = 1 << 6,
-	NO_TRANSLATION  = 1 << 7,
-	NO_LINF         = 1 << 8
+	NO_PREVIOUS     = 1 << 7,
+	NO_TRANSLATION  = 1 << 8,
+	NO_LINF         = 1 << 9
 } po_write_modes;
 
 enum {
@@ -430,6 +439,20 @@ po_write (PoFile *pof, po_write_modes mode)
 				potool_printf ("#,%s\n", (char *) ll->data);
 			}
 		}
+		if (!(mode & NO_PREVIOUS)) {
+			if (po->previous.ctx) {
+				potool_printf ("#| msgctxt ");
+				print_multi_line (po->previous.ctx, 11, "");
+			}
+			if (po->previous.id) {
+				potool_printf ("#| msgid ");
+				print_multi_line (po->previous.id, 9, "");
+			}
+			if (po->previous.id_plural) {
+				potool_printf ("#| msgid_plural ");
+				print_multi_line (po->previous.id, 16, "");
+			}
+		}
 		if ((!(mode & NO_CTX)) && po->ctx) {
 			potool_printf ("msgctxt ");
 			print_multi_line (po->ctx, 8, "");
@@ -467,6 +490,20 @@ po_write (PoFile *pof, po_write_modes mode)
 		if (!(mode & NO_SPEC_COMMENT)) {
 			for (ll = po->comments.spec; ll != NULL; ll = ll->next) {
 				potool_printf ("#,%s\n", (char *) ll->data);
+			}
+		}
+		if (!(mode & NO_PREVIOUS)) {
+			if (po->previous.ctx) {
+				potool_printf ("#~| msgctxt ");
+				print_multi_line (po->previous.ctx, 12, "");
+			}
+			if (po->previous.id) {
+				potool_printf ("#~| msgid ");
+				print_multi_line (po->previous.id, 10, "");
+			}
+			if (po->previous.id_plural) {
+				potool_printf ("#~| msgid_plural ");
+				print_multi_line (po->previous.id, 17, "");
 			}
 		}
 

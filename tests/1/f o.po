@@ -3,5 +3,6 @@
 #~ msgstr "nieznany"
 
 #, fuzzy
+#~| msgid "Load CD-ROM drivers from removable media?"
 #~ msgid "Load OEM supported drivers from driver injection disk?"
 #~ msgstr "Zaladowac sterowniki CD-ROMu z urzadzenia zewnetrznego?"

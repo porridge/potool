@@ -21,6 +21,12 @@ msgstr "Wybierz rodzaj sterowania"
 msgid "Select to click on the source then the destination."
 msgstr ""
 
+#: ../some/file.cc:1
+#, fuzzy
+#| msgid "What is your name?"
+msgid "What was your name?"
+msgstr "Jak sie nazywasz?"
+
 #: ../gtali/gyahtzee.c:150
 #, c-format
 msgid "%s wins the game with %d point"

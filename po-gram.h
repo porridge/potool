@@ -21,12 +21,17 @@ typedef struct {
 } PoComments;
 
 typedef struct {
+	char *ctx, *id, *id_plural;
+} PoPrevious;
+
+typedef struct {
 	char *str;
 	int n;
 } MsgStrX;
 
 typedef struct {
 	PoComments comments;
+	PoPrevious previous;
 	gboolean is_fuzzy, is_c_format;
 	char *ctx, *id, *id_plural, *str;
 	GSList *msgstrxs;
