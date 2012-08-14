@@ -1,68 +1,21 @@
 #!/usr/bin/make -f
-# Sample debian/rules that uses debhelper.
-# GNU copyright 1997 to 1999 by Joey Hess.
-# Modified for potool by Marcin Owsiany <porridge@debian.org>
+# Copyright 2012 Marcin Owsiany <porridge@debian.org>
 
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
+export CFLAGS   := $(shell dpkg-buildflags --get CFLAGS)
+export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export LDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS)
+%:
+	dh $@
 
-ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
-export CFLAGS
+override_dh_auto_install:
+	dh_auto_install -- DESTDIR=`pwd`/debian/potool BINDIR='$$(DESTDIR)/usr/bin' BININSTALL=install
+# filename conflict with the poedit package, handled via alternatives
+	mv debian/potool/usr/bin/poedit debian/potool/usr/bin/potooledit
+# low quality, Polish-specific
+	rm debian/potool/usr/bin/poupdate
 
-# dh_strip will take care of nostrip
-
-build: build-stamp
-build-stamp:
-	dh_testdir
-	$(MAKE) DESTDIR= BINDIR=/usr/bin CFLAGS='$$(GLIB_INCLUDE) -g -Wall $(CFLAGS)'
-ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	cd tests && bash test
-endif
-	touch build-stamp
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-	$(MAKE) clean
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-	mkdir debian/tmp debian/tmp/usr debian/tmp/usr/bin
-	$(MAKE) install DESTDIR=`pwd`/debian/tmp BINDIR='$$(DESTDIR)/usr/bin' BININSTALL=install
-
-
-binary-indep: build install
-# We have nothing to do by default.
-
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_movefiles
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installdirs usr/share/man/man1 usr/share/man/pl/man1
-	dh_installman potool.1 change-po-charset.1 postats.1
-	install poedit.1 debian/potool/usr/share/man/man1/potooledit.1
-	for m in potool change-po-charset postats ; do \
-	 install $${m}.pl.1 debian/potool/usr/share/man/pl/man1/$${m}.1 ; done
-	install poedit.pl.1 debian/potool/usr/share/man/pl/man1/potooledit.1
-	dh_installchangelogs
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+override_dh_installman:
+	dh_installman
+# filename conflict with the poedit package, handled via alternatives
+	rename 's,poedit[.]1,potooledit.1,' debian/potool/usr/share/man/*/man1/poedit.1 debian/potool/usr/share/man/man1/poedit.1

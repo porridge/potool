@@ -1,11 +1,7 @@
 This package was debianized by Marcin Owsiany <porridge@debian.org> on
 Wed, 13 Dec 2000 00:39:40 +0100.
 
-It was downloaded from the CVS server of GNOME PL project. See
-http://www.gnomepl.org/
-The CVS repository is now at pserver://cvs.pld-linux.org:/gnomepl
-(gnomepl/tools/potool)
-The program's current home page is http://marcin.owsiany.pl/potool.en.html
+The program's current home page is http://marcin.owsiany.pl/potool-page
 
 Upstream Authors:
  Zbigniew Chyla <cyba@gnome.pl>
@@ -15,7 +11,7 @@ Copyright information:
 
 potool is a program aiding editing of po files
 Copyright (C) 1999-2000 Zbigniew Chyla <cyba@gnome.pl>
-Copyright (C) 2000-2007 Marcin Owsiany <porridge@debian.org>
+Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
 
 License information:
 

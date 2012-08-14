@@ -7,8 +7,16 @@ potool (0.14-1) unstable; urgency=low
       Closes: #567940
     - directly handles sensible-editor in poedit, making the debian change
       obsolete
+  * Modernize the build system.
+    - use dh and compat level 8
+    - for poedit vs potooledit, rather than patching the Makefile, fix up
+      filenames after installation
+    - bump standards-version to 3.9.3
+    - change the Conflicts on poedit to a Breaks, as recommended by the policy
+    - update debian/copyright
+    - use source format 3
 
- -- Marcin Owsiany <porridge@debian.org>  Tue, 14 Aug 2012 21:09:21 +0200
+ -- Marcin Owsiany <porridge@debian.org>  Thu, 16 Aug 2012 11:49:05 +0200
 
 potool (0.12-1) unstable; urgency=low
 

@@ -2,13 +2,13 @@ Source: potool
 Section: utils
 Priority: optional
 Maintainer: Marcin Owsiany <porridge@debian.org>
-Standards-Version: 3.8.0
-Build-Depends: libglib2.0-dev, bison, flex, debhelper (>> 4.0.0)
+Standards-Version: 3.9.3
+Build-Depends: libglib2.0-dev, bison, flex, debhelper (>= 8)
 
 Package: potool
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: poedit (<< 1.0.3-2)
+Breaks: poedit (<< 1.0.3-2)
 Homepage: http://marcin.owsiany.pl/potool-page
 Description: program to aid manipulation of gettext po files
  This package contains the filter program 'potool', as well

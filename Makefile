@@ -38,9 +38,9 @@ po.tab.c: po-gram.y
 install: potool
 	$(INSTALL) -d $(BINDIR)
 	$(BININSTALL) potool $(BINDIR)
-	$(INSTALL) scripts/poedit $(BINDIR)/potooledit
+	$(INSTALL) scripts/poedit $(BINDIR)
 	$(INSTALL) scripts/postats $(BINDIR)
-#	$(INSTALL) scripts/poupdate $(BINDIR)
+	$(INSTALL) scripts/poupdate $(BINDIR)
 	$(INSTALL) change-po-charset $(BINDIR)
 
 clean:
