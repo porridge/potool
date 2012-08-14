@@ -20,7 +20,7 @@
 
 int polineno;
 int polex (void);
-void poerror (char *s);
+void poerror (const char *s);
 
 static GSList *entries = NULL, *obsolete_entries = NULL;
 static char *concat_strings (GSList *slist);
@@ -483,7 +483,7 @@ concat_strings (GSList *slist)
 }
 
 void
-poerror (char *s)
+poerror (const char *s)
 {
 	fflush (stdout);
 	po_error (_("Parse error at line %d: %s\n"), polineno, s);
