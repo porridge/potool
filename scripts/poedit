@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
 
 #
 # Set up temporary directory
@@ -51,11 +52,18 @@ TMPFILE2="$TMPFILE.tmp"
 # Some sanity checks
 #
 [ -z "$POFILE" ] && usage
-if ! [ -w "$POFILE" ] ;then
+if ! [ -w "$POFILE" ]; then
 	echo "$POFILE: not writable" >&2
 	exit 1
 fi
-EDITCMD=sensible-editor
+if [ -n "$EDITOR" ]; then
+	EDITCMD="$EDITOR"
+elif which sensible-editor >/dev/null 2>&1; then
+	EDITCMD="sensible-editor"
+else
+	echo '$EDITOR is not set, and sensible-editor is not available' >&2
+	exit 1
+fi
 
 #
 # Get file encoding

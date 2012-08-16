@@ -17,6 +17,10 @@ msgstr ""
 msgid "Select the style of control"
 msgstr "Wybierz rodzaj sterowania"
 
+#: ../aisleriot/aisleriot.schemas.in.h:3
+msgid "Select to click on the source then the destination."
+msgstr ""
+
 #: ../some/file.cc:1
 #, fuzzy
 #| msgid "What is your name?"
@@ -39,10 +43,24 @@ msgid "%s bla"
 msgid_plural "%s blas"
 msgstr[0] "%s wygral(a) gre punktem"
 
-#~ msgid "unknown"
-#~ msgstr "nieznany"
+#: ../same-gnome/ui.c:76
+#, c-format
+msgid "%d point"
+msgid_plural "%d points"
+msgstr[0] "%d punkt"
+msgstr[1] "%d punkty"
+msgstr[2] ""
 
-#, fuzzy
-#~| msgid "Load CD-ROM drivers from removable media?"
-#~ msgid "Load OEM supported drivers from driver injection disk?"
-#~ msgstr "Zaladowac sterowniki CD-ROMu z urzadzenia zewnetrznego?"
+#: ../ble.c:1
+#, c-format
+msgid "%d oja"
+msgid_plural "%d ojas"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: ../ble.c:1
+#, c-format
+msgid "%d oje"
+msgid_plural "%d ojes"
+msgstr[0] ""

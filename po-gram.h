@@ -1,6 +1,7 @@
 /*
  * potool is a program aiding editing of po files
  * Copyright (C) 1999-2002 Zbigniew Chyla
+ * Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
  *
  * see LICENSE for licensing info
  */
@@ -21,23 +22,21 @@ typedef struct {
 } PoComments;
 
 typedef struct {
+	char *ctx, *id, *id_plural;
+} PoPrevious;
+
+typedef struct {
 	char *str;
 	int n;
 } MsgStrX;
 
 typedef struct {
 	PoComments comments;
+	PoPrevious previous;
 	gboolean is_fuzzy, is_c_format;
 	char *ctx, *id, *id_plural, *str;
 	GSList *msgstrxs;
 } PoEntry;
-
-typedef struct {
-	PoComments comments;
-	gboolean is_fuzzy, is_c_format;
-	char *ctx, *id, *id_plural, *str;
-	GSList *msgstrxs;
-} PoObsoleteEntry;
 
 typedef struct {
 	GSList *entries, *obsolete_entries;

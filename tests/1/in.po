@@ -21,6 +21,12 @@ msgstr "Wybierz rodzaj sterowania"
 msgid "Select to click on the source then the destination."
 msgstr ""
 
+#: ../some/file.cc:1
+#, fuzzy
+#| msgid "What is your name?"
+msgid "What was your name?"
+msgstr "Jak sie nazywasz?"
+
 #: ../gtali/gyahtzee.c:150
 #, c-format
 msgid "%s wins the game with %d point"
@@ -58,3 +64,11 @@ msgstr[2] ""
 msgid "%d oje"
 msgid_plural "%d ojes"
 msgstr[0] ""
+
+#~ msgid "unknown"
+#~ msgstr "nieznany"
+
+#, fuzzy
+#~| msgid "Load CD-ROM drivers from removable media?"
+#~ msgid "Load OEM supported drivers from driver injection disk?"
+#~ msgstr "Zaladowac sterowniki CD-ROMu z urzadzenia zewnetrznego?"

@@ -1,7 +1,7 @@
 /*
  * potool is a program aiding editing of po files
  * Copyright (C) 1999-2002 Zbigniew Chyla
- * Copyright (C) 2007-2009 Marcin Owsiany
+ * Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
  *
  * see LICENSE for licensing info
  */
@@ -22,6 +22,16 @@
 
 
 typedef gboolean po_filter_func (PoEntry *);
+
+void
+po_error(const gchar *format, ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	g_logv(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, format, ap);
+	va_end(ap);
+	exit(1);
+}
 
 void
 msgstrx_free(MsgStrX *msgstrx)
@@ -68,6 +78,10 @@ po_entry_copy (PoEntry *ret, PoEntry *po)
 	ret->comments.spec = g_slist_copy (po->comments.spec);
 	po_list_str_dup(ret->comments.spec);
 
+	ret->previous.ctx = g_strdup (po->previous.ctx);
+	ret->previous.id = g_strdup (po->previous.id);
+	ret->previous.id_plural = g_strdup (po->previous.id_plural);
+
 	ret->is_fuzzy = po->is_fuzzy;
 	ret->is_c_format = po->is_c_format;
 
@@ -90,21 +104,10 @@ po_entry_free (PoEntry *po)
 	g_slist_free_custom (po->comments.res, g_free);
 	g_slist_free_custom (po->comments.spec, g_free);
 	g_slist_free_custom (po->msgstrxs, msgstrx_free);
-	g_free (po->id);
-	g_free (po->id_plural);
-	g_free (po->ctx);
-	g_free (po->str);
-	g_free (po);
-}
+	g_free (po->previous.id);
+	g_free (po->previous.id_plural);
+	g_free (po->previous.ctx);
 
-void
-po_obsolete_entry_free (PoObsoleteEntry *po)
-{
-	g_slist_free_custom (po->comments.std, g_free);
-	g_slist_free_custom (po->comments.pos, g_free);
-	g_slist_free_custom (po->comments.res, g_free);
-	g_slist_free_custom (po->comments.spec, g_free);
-	g_slist_free_custom (po->msgstrxs, msgstrx_free);
 	g_free (po->id);
 	g_free (po->id_plural);
 	g_free (po->ctx);
@@ -116,7 +119,7 @@ void
 po_free (PoFile *pof)
 {
 	g_slist_free_custom (pof->entries, po_entry_free);
-	g_slist_free_custom (pof->obsolete_entries, po_obsolete_entry_free);
+	g_slist_free_custom (pof->obsolete_entries, po_entry_free);
 	g_free (pof);
 }
 
@@ -194,6 +197,17 @@ po_apply_filter (PoFile *pof, po_filter_func *filter)
 	}
 	g_slist_free (pof->entries);
 	pof->entries = g_slist_reverse (npo_list);
+
+	for (npo_list = NULL, l = pof->obsolete_entries; l != NULL; l = l->next) {
+		if (filter ((PoEntry *) l->data)) {
+			npo_list = g_slist_prepend (npo_list, l->data);
+		} else {
+			po_entry_free (l->data);
+		}
+	}
+	g_slist_free (pof->obsolete_entries);
+	pof->obsolete_entries = g_slist_reverse (npo_list);
+
 }
 
 typedef enum {
@@ -230,7 +244,7 @@ po_apply_filters (PoFile *pof, PoFilters filters)
 		pof->entries = NULL;
 	}
 	if ((filters & NOT_OBSOLETE_FILTER) != 0) {
-		g_slist_free_custom (pof->obsolete_entries, po_obsolete_entry_free);
+		g_slist_free_custom (pof->obsolete_entries, po_entry_free);
 		pof->obsolete_entries = NULL;
 	}
 }
@@ -267,8 +281,9 @@ typedef enum {
 	NO_POS_COMMENT  = 1 << 4,
 	NO_SPEC_COMMENT = 1 << 5,
 	NO_RES_COMMENT  = 1 << 6,
-	NO_TRANSLATION  = 1 << 7,
-	NO_LINF         = 1 << 8
+	NO_PREVIOUS     = 1 << 7,
+	NO_TRANSLATION  = 1 << 8,
+	NO_LINF         = 1 << 9
 } po_write_modes;
 
 enum {
@@ -283,7 +298,7 @@ int potool_printf(char *format, ...)
 	va_start(ap, format);
 	ret = vprintf(format, ap);
 	if (ret < 0)
-		g_error(_("printf() failed, returning %d: %s"), ret, strerror(errno));
+		po_error(_("printf() failed with code %d: %s"), ret, strerror(errno));
 	va_end(ap);
 	return ret;
 }
@@ -344,7 +359,7 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 				offset = prefix_len;
 			}
 			if ((ret = fwrite(cur, 1, word_len, stdout)) != word_len)
-				g_error(_("fwrite() failed, returned %d instead of %d: %s"), ret, word_len, strerror(errno));
+				po_error(_("fwrite() failed, returned %d instead of %d: %s"), ret, word_len, strerror(errno));
 			offset += word_len;
 			cur += word_len;
 		} while (*cur != '\0');
@@ -434,6 +449,20 @@ po_write (PoFile *pof, po_write_modes mode)
 				potool_printf ("#,%s\n", (char *) ll->data);
 			}
 		}
+		if (!(mode & NO_PREVIOUS)) {
+			if (po->previous.ctx) {
+				potool_printf ("#| msgctxt ");
+				print_multi_line (po->previous.ctx, 11, "");
+			}
+			if (po->previous.id) {
+				potool_printf ("#| msgid ");
+				print_multi_line (po->previous.id, 9, "");
+			}
+			if (po->previous.id_plural) {
+				potool_printf ("#| msgid_plural ");
+				print_multi_line (po->previous.id, 16, "");
+			}
+		}
 		if ((!(mode & NO_CTX)) && po->ctx) {
 			potool_printf ("msgctxt ");
 			print_multi_line (po->ctx, 8, "");
@@ -460,7 +489,7 @@ po_write (PoFile *pof, po_write_modes mode)
 	}
 
 	for (l = pof->obsolete_entries; l != NULL; l = l->next) {
-		PoObsoleteEntry *po = l->data;
+		PoEntry *po = l->data;
 		GSList *ll;
 
 		if (!(mode & NO_STD_COMMENT)) {
@@ -471,6 +500,20 @@ po_write (PoFile *pof, po_write_modes mode)
 		if (!(mode & NO_SPEC_COMMENT)) {
 			for (ll = po->comments.spec; ll != NULL; ll = ll->next) {
 				potool_printf ("#,%s\n", (char *) ll->data);
+			}
+		}
+		if (!(mode & NO_PREVIOUS)) {
+			if (po->previous.ctx) {
+				potool_printf ("#~| msgctxt ");
+				print_multi_line (po->previous.ctx, 12, "");
+			}
+			if (po->previous.id) {
+				potool_printf ("#~| msgid ");
+				print_multi_line (po->previous.id, 10, "");
+			}
+			if (po->previous.id_plural) {
+				potool_printf ("#~| msgid_plural ");
+				print_multi_line (po->previous.id, 17, "");
 			}
 		}
 
@@ -581,7 +624,7 @@ main (int argc, char **argv)
 				} else if (strcmp (optarg, "linf") == 0) {
 					write_mode |= NO_LINF;
 				} else {
-					g_error (_("Unknown parameter for -n option!"));
+					po_error (_("Unknown parameter for -n option!"));
 				}
 				break;
 			case 's' :
@@ -606,14 +649,14 @@ main (int argc, char **argv)
 				} else if (strcmp (optarg, "no") == 0) {
 					ifilters |= NOT_OBSOLETE_FILTER;
 				} else {
-					g_error (_("Unknown filter!"));
+					po_error (_("Unknown filter \"%s\"!"), optarg);
 				}
 				break;
 			case ':' :
-				g_error (_("Invalid parameter!"));
+				po_error (_("Invalid parameter!"));
 				break;
 			case '?' :
-				g_error (_("Invalid option!"));
+				po_error (_("Invalid option!"));
 				break;
 			default :
 				g_assert_not_reached ();
@@ -621,7 +664,7 @@ main (int argc, char **argv)
 	}
 
 	if (optind >= argc) {
-		g_error (_("Input file not specified!"));
+		po_error (_("Input file not specified!"));
 	}
 	if (argc - optind == 1) {
 		PoFile *pof;
@@ -657,7 +700,7 @@ main (int argc, char **argv)
 		po_free (pof);
 	}
 	if (fflush(stdout) != 0)
-		g_error(_("fflush(stdout) failed: %s"), strerror(errno));
+		po_error(_("fflush(stdout) failed: %s"), strerror(errno));
 
 	return 0;
 }

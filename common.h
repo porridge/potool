@@ -17,4 +17,9 @@ G_STMT_START { \
 	g_slist_free (potool_list); \
 } G_STMT_END
 
+/* Critical error that causes the program to exit 1.
+ * This is unlike g_error which calls abort() which dumps core.
+ */
+void po_error(const gchar *format, ...);
+
 #endif /* COMMON_H */

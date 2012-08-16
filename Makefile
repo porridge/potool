@@ -1,12 +1,12 @@
 #
 # potool is a program aiding editing of po files
 # Copyright (C) 1999-2002 Zbigniew Chyla
-# Copyright (C) 2000-2011 Marcin Owsiany
+# Copyright (C) 2000-2012 Marcin Owsiany
 #
 # see LICENSE for licensing info
 #
 
-VER = 0.12
+VER = 0.14
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
@@ -16,8 +16,9 @@ GTAR = tar
 
 GLIB_LIB = $(shell pkg-config --libs glib-2.0)
 GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
-CFLAGS = $(GLIB_INCLUDE) -g -Wall -O2
-LDLIBS = $(GLIB_LIB)
+CPPFLAGS += $(GLIB_INCLUDE)
+CFLAGS += -g -Wall -Werror -O2
+LDLIBS += $(GLIB_LIB)
 
 THINGS  = potool po.tab lex.po
 OBJS    = $(addsuffix .o, $(THINGS))
@@ -35,6 +36,7 @@ po.tab.c: po-gram.y
 	bison -ppo -bpo -d $<
 
 install: potool
+	$(INSTALL) -d $(BINDIR)
 	$(BININSTALL) potool $(BINDIR)
 	$(INSTALL) scripts/poedit $(BINDIR)/potooledit
 	$(INSTALL) scripts/postats $(BINDIR)
@@ -48,5 +50,8 @@ dist: clean
 	cd ..; \
 	 rm -f potool-$(VER).tar{,.gz} potool-$(VER); \
 	 ln -s potool potool-$(VER); \
-	 $(GTAR) --exclude='*/CVS' --exclude='*/.cvsignore' --owner=root --group=root -hcf potool-$(VER).tar potool-$(VER) && \
+	 $(GTAR) --exclude='*/.git*' --owner=root --group=root -hcf potool-$(VER).tar potool-$(VER) && \
 	 gzip -9 potool-$(VER).tar
+
+check: potool
+	cd tests && bash test
