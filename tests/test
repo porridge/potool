@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 for dir in 1
 do
@@ -16,3 +17,19 @@ do
 	${WRAPPER} ../potool $dir/in.po $dir/work.po | diff -u $dir/work.po -
 done
 
+for dir in 3
+do
+	function poedit_test()
+	{
+		local desc="$1"; shift
+		local opts="$1"; shift
+
+		echo TESTING $dir with "$desc"
+		cp $dir/in.po $dir/work.po
+		PATH="$(pwd)/../scripts:$(pwd)/../:$PATH" EDITOR=: poedit $opts $dir/work.po
+		diff -u $dir/in.po $dir/work.po
+		rm -f $dir/work.po
+	}
+	poedit_test "no options" ""
+	poedit_test "-a" "-a"
+done

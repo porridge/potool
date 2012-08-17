@@ -88,9 +88,11 @@ fi
 
 if [ "$INCLUDE_ALL_MSGS" = "yes" ]
 then
-	potool "$POFILE" -ft > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	potool "$POFILE" -ft -fno > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft -fno > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 	echo >> "$TMPFILE"
 	potool "$POFILE" -fnt >> "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnt >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	echo >> "$TMPFILE"
+	potool "$POFILE" -ft -fo >> "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft -fo >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 else
 	potool "$POFILE" -fnth > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnth > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 fi
