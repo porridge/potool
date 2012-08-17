@@ -1,3 +1,10 @@
+potool (0.15-1) unstable; urgency=low
+
+  * New version
+    - fixes poedit on files with obsolete entries
+
+ -- Marcin Owsiany <porridge@debian.org>  Fri, 17 Aug 2012 18:43:35 +0200
+
 potool (0.14-1) unstable; urgency=low
 
   * New version
