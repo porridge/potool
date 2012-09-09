@@ -459,10 +459,9 @@ static char *
 concat_strings (GSList *slist)
 {
 	GSList *l;
-	int total_len;
+	int total_len = 0;
 	char *str, *p;
 
-	total_len = 0;
 	for (l = slist; l != NULL; l = l->next) {
 		total_len += strlen (l->data);
 	}
@@ -470,9 +469,7 @@ concat_strings (GSList *slist)
 	p = str;
 	for (l = slist; l != NULL; l = l->next) {
 		char *s = l->data;
-		int len;
-
-		len = strlen (s);
+		int len = strlen (s);
 		if (len > 0) {
 			g_memmove (p, s, len);
 			p += len;
