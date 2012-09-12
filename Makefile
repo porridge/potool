@@ -17,7 +17,7 @@ GTAR = tar
 GLIB_LIB = $(shell pkg-config --libs glib-2.0)
 GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
 CPPFLAGS += $(GLIB_INCLUDE)
-CFLAGS += -g -Wall -Werror -O2
+CFLAGS += -g -Wall -Werror
 LDLIBS += $(GLIB_LIB)
 
 THINGS  = potool po.tab lex.po
