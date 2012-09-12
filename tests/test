@@ -1,35 +1,49 @@
 #!/bin/bash
 set -e
-for dir in 1
-do
-	echo TESTING $dir/no filter
-	${WRAPPER} ../potool $dir/in.po | diff -u $dir/in.po -
-	(cd $dir && ls -1 | egrep -v '^(in.po|CVS)$') | while read out
-	do
-		echo "TESTING $dir/${out/.po}"
-		${WRAPPER} ../potool -${out/.po} $dir/in.po | diff -u $dir/"${out}" -
-	done
+set -x
+
+function potool_test()
+{
+	local dir="$1"
+	local desc="$2"
+	local opts="$3"
+	local out="$4"
+	if [ -z "$out" ]; then out="in.po"; fi
+
+	rm -f $dir/out.po
+	echo TESTING $dir with "$desc"
+	${WRAPPER} ../potool $opts $dir/in.po > $dir/out.po
+	diff -u "$dir/$out" $dir/out.po
+	rm -f $dir/out.po
+}
+
+potool_test 1 "no filter" ""
+(cd 1 && ls -1 | egrep -v '^(in.po|CVS)$') | while read out; do
+	potool_test 1 "-${out/.po}" "-${out/.po}" "$out"
 done
 
 for dir in 2
 do
 	echo TESTING $dir/work.po
-	${WRAPPER} ../potool $dir/in.po $dir/work.po | diff -u $dir/work.po -
+	${WRAPPER} ../potool $dir/in.po $dir/work.po > $dir/out.po
+	diff -u $dir/work.po $dir/out.po
+	rm -f $dir/out.po
 done
 
-for dir in 3
-do
-	function poedit_test()
-	{
-		local desc="$1"; shift
-		local opts="$1"; shift
+function poedit_test()
+{
+	local dir="$1"; shift
+	local desc="$1"; shift
+	local opts="$1"; shift
 
-		echo TESTING $dir with "$desc"
-		cp $dir/in.po $dir/work.po
-		PATH="$(pwd)/../scripts:$(pwd)/../:$PATH" EDITOR=: poedit $opts $dir/work.po
-		diff -u $dir/in.po $dir/work.po
-		rm -f $dir/work.po
-	}
-	poedit_test "no options" ""
-	poedit_test "-a" "-a"
-done
+	echo TESTING $dir with "$desc"
+	cp $dir/in.po $dir/work.po
+	PATH="$(pwd)/../scripts:$(pwd)/../:$PATH" EDITOR=: poedit $opts $dir/work.po
+	diff -u $dir/in.po $dir/work.po
+	rm -f $dir/work.po
+}
+
+poedit_test 3 "no options" ""
+poedit_test 3 "-a" "-a"
+
+poedit_test 4-wrapping "-p" "-p"
