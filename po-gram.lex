@@ -35,14 +35,21 @@ po_scan_open_file (char *fn)
 	yy_switch_to_buffer (buf_state);
 }
 
-void po_scan_close_file (void)
+// I don't know why lex' own declaration is not visible to this block, but
+// using this seems to be the only way to avoid leaks.
+int polex_destroy (void);
+
+void
+po_scan_close_file (void)
 {
 	if (buf_state == (YY_BUFFER_STATE) 0) {
 		g_error (_("Can't delete input buffer!"));
 	}
-	buf_state = NULL;
-	buf_file = NULL;
 	yy_delete_buffer (buf_state);
+	buf_state = NULL;
+	fclose(buf_file);
+	buf_file = NULL;
+	polex_destroy();
 }
 
 
