@@ -50,14 +50,14 @@ o   \- wpisy nieużywane (oznaczone przedrostkiem "#~ ")
 .br
 no  \- wpisy używane
 .br
-Filtry można na siebie nakładać, używając kilku opcji -f.
+Filtry można na siebie nakładać, używając kilku opcji \-f.
 .TP
 .B \-n filtr
 działa w obu trybach pracy tak samo i określa, jakie informacje w
 każdym z wpisów
 .I nie
 powinny być wyświetlane przy wypisywaniu ich przez program. Dozwolona jest
-dowolna liczba opcji -n. Dopuszczalne parametry:
+dowolna liczba opcji \-n. Dopuszczalne parametry:
 .br
 ctxt  \- nie wypisuj części 'ctxt'
 .br
@@ -102,21 +102,21 @@ kopiuje we wszystkich wpisach część 'id' do 'str' (być może zastępując t�
 wyświetla krótką informację na temat użycia.
 .SH PRZYKŁADY
 .TP
-potool x.po -s -ft
+potool x.po \-s \-ft
 wyświetla liczbę przetłumaczonych wpisów. Patrz także
 .BR postats (1).
 .TP
-potool x.po -nstr
+potool x.po \-nstr
 oczyszcza plik z tłumaczeń - a więc możemy zaczynać od zera ;)
 .TP
-potool x.po -ft && potool x.po -fnt
+potool x.po \-ft && potool x.po \-fnt
 wyświetla z pliku najpierw wpisy przetłumaczone, a następnie nie
 posiadające tłumaczenia (ze względu na pierwszy wpis nie zaleca
 się stosowania odwrotnej kolejności).
 Plik taki zawiera wszystkie informacje z x.po, natomiast braki w
 tłumaczeniach są skupione w jednym miejscu.
 .TP
-potool x.po -fnt > tmp.po && editor tmp.po && potool x.po tmp.po
+potool x.po \-fnt > tmp.po && editor tmp.po && potool x.po tmp.po
 pozwala na proste dodawanie nowych tłumaczeń, bez przeglądania
 starych.
 .P
