@@ -1,5 +1,5 @@
 potool (0.10-1) unstable; urgency=low
 
-  * The "postats1" script is gone. Please use "postats -f" instead.
+  The "postats1" script is gone. Please use "postats -f" instead.
 
  -- Marcin Owsiany <porridge@debian.org>  Mon, 24 Sep 2007 14:58:39 +0100
