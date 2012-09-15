@@ -34,10 +34,33 @@ po_error(const gchar *format, ...)
 }
 
 void
+stringblock_free(StringBlock *block)
+{
+	if (block == NULL)
+		return;
+	g_free (block->str);
+	g_free (block->line_lengths);
+	g_free (block);
+}
+
+void
 msgstrx_free(MsgStrX *msgstrx)
 {
-	g_free (msgstrx->str);
+	stringblock_free (msgstrx->str);
 	g_free (msgstrx);
+}
+
+StringBlock*
+stringblock_dup(StringBlock *block)
+{
+	if (block == NULL)
+		return NULL;
+	StringBlock *ret = g_new(StringBlock, 1);
+	*ret = *block;
+	ret->str = g_strdup (ret->str);
+	ret->line_lengths = malloc(sizeof(int) * ret->num_lines);
+	memcpy(ret->line_lengths, block->line_lengths, sizeof(int) * ret->num_lines);
+	return ret;
 }
 
 void
@@ -50,6 +73,17 @@ po_list_str_dup(GSList *list)
 	}
 }
 
+
+void
+po_list_stringblock_dup(GSList *list)
+{
+	GSList *l;
+	for (l = list; l != NULL; l = l->next) {
+		StringBlock *s = l->data;
+		l->data = stringblock_dup (s);
+	}
+}
+
 void
 po_list_msgstrx_dup(GSList *list)
 {
@@ -58,7 +92,7 @@ po_list_msgstrx_dup(GSList *list)
 		MsgStrX *s = l->data;
 		MsgStrX *n = g_new (MsgStrX, 1);
 		n->n = s->n;
-		n->str = g_strdup (s->str);
+		n->str = stringblock_dup(s->str);
 		l->data = n;
 	}
 }
@@ -78,17 +112,17 @@ po_entry_copy (PoEntry *ret, PoEntry *po)
 	ret->comments.spec = g_slist_copy (po->comments.spec);
 	po_list_str_dup(ret->comments.spec);
 
-	ret->previous.ctx = g_strdup (po->previous.ctx);
-	ret->previous.id = g_strdup (po->previous.id);
-	ret->previous.id_plural = g_strdup (po->previous.id_plural);
+	ret->previous.ctx = stringblock_dup (po->previous.ctx);
+	ret->previous.id = stringblock_dup (po->previous.id);
+	ret->previous.id_plural = stringblock_dup (po->previous.id_plural);
 
 	ret->is_fuzzy = po->is_fuzzy;
 	ret->is_c_format = po->is_c_format;
 
-	ret->ctx = g_strdup (po->ctx);
-	ret->id = g_strdup (po->id);
-	ret->id_plural = g_strdup (po->id_plural);
-	ret->str = g_strdup (po->str);
+	ret->ctx = stringblock_dup (po->ctx);
+	ret->id = stringblock_dup (po->id);
+	ret->id_plural = stringblock_dup (po->id_plural);
+	ret->str = stringblock_dup (po->str);
 
 	ret->msgstrxs = g_slist_copy (po->msgstrxs);
 	po_list_msgstrx_dup(ret->msgstrxs);
@@ -97,21 +131,27 @@ po_entry_copy (PoEntry *ret, PoEntry *po)
 }
 
 void
-po_entry_free (PoEntry *po)
+po_entry_free_contents (PoEntry *po)
 {
 	g_slist_free_custom (po->comments.std, g_free);
 	g_slist_free_custom (po->comments.pos, g_free);
 	g_slist_free_custom (po->comments.res, g_free);
 	g_slist_free_custom (po->comments.spec, g_free);
 	g_slist_free_custom (po->msgstrxs, msgstrx_free);
-	g_free (po->previous.id);
-	g_free (po->previous.id_plural);
-	g_free (po->previous.ctx);
+	stringblock_free (po->previous.id);
+	stringblock_free (po->previous.id_plural);
+	stringblock_free (po->previous.ctx);
 
-	g_free (po->id);
-	g_free (po->id_plural);
-	g_free (po->ctx);
-	g_free (po->str);
+	stringblock_free (po->id);
+	stringblock_free (po->id_plural);
+	stringblock_free (po->ctx);
+	stringblock_free (po->str);
+}
+
+void
+po_entry_free (PoEntry *po)
+{
+	po_entry_free_contents (po);
 	g_free (po);
 }
 
@@ -129,19 +169,26 @@ gint
 msgstrx_is_same_firstchar (gconstpointer a, gconstpointer b)
 {
 	const MsgStrX *as = a, *bs = b;
-	return ! (as == bs || (as && bs && ((as->str == bs->str) || (as->str && bs->str && as->str[0] == bs->str[0]))));
+	return ! (as == bs ||
+	          (as && bs &&
+	           ((as->str == bs->str) ||
+	            (as->str && as->str->str &&
+	             bs->str && bs->str->str &&
+	             as->str->str[0] == bs->str->str[0]))));
 }
 
 static gboolean
 po_filter_translated (PoEntry *po)
 {
-	if (po->str)
-		return po->str[0] != '\0';
+	if (po->str && po->str->str)
+		return po->str->str[0] != '\0';
 	
 	/* With plural forms, only return true if ALL forms are translated. The
 	 * list is guaranteed to be non-empty by the grammar */
 	else {
-		MsgStrX empty = { "", 0 };
+		int one_empty_line[] = { 0 };
+		StringBlock empty_block = { "", 1, one_empty_line };
+		MsgStrX empty = { &empty_block, 0 };
 		return NULL == g_slist_find_custom (po->msgstrxs, &empty, msgstrx_is_same_firstchar);
 	}
 }
@@ -149,13 +196,15 @@ po_filter_translated (PoEntry *po)
 static gboolean
 po_filter_not_translated (PoEntry *po)
 {
-	if (po->str)
-		return po->str[0] == '\0';
+	if (po->str && po->str->str)
+		return po->str->str[0] == '\0';
 
 	/* With plural forms, only return true if ANY forms are not translated.
 	 * The list is guaranteed to be non-empty by the grammar */
 	else {
-		MsgStrX empty = { "", 0 };
+		int one_empty_line[] = { 0 };
+		StringBlock empty_block = { "", 1, one_empty_line };
+		MsgStrX empty = { &empty_block, 0 };
 		return NULL != g_slist_find_custom (po->msgstrxs, &empty, msgstrx_is_same_firstchar);
 	}
 }
@@ -163,7 +212,7 @@ po_filter_not_translated (PoEntry *po)
 static gboolean
 po_filter_not_translated_and_header (PoEntry *po)
 {
-	if (po->id[0] == '\0')
+	if (po->id->str[0] == '\0')
 		return 1;
 	else
 		return po_filter_not_translated (po);
@@ -258,12 +307,12 @@ po_copy_msgid (PoFile *pof)
 		PoEntry *po = l->data;
 
 		if (po->str) {
-			g_free (po->str);
-			po->str = g_strdup (po->id);
+			stringblock_free (po->str);
+			po->str = stringblock_dup (po->id);
 		} else {
 			MsgStrX *m = g_new (MsgStrX, 1);
 			m->n = 0;
-			m->str = g_strdup (po->id);
+			m->str = stringblock_dup (po->id);
 			g_slist_free_custom (po->msgstrxs, msgstrx_free);
 			po->msgstrxs = g_slist_append(NULL, m);
 		}
@@ -304,7 +353,7 @@ int potool_printf(char *format, ...)
 }
 
 static void
-print_multi_line (const char *s, int start_offset, const char *prefix)
+print_multi_line (const StringBlock *s, int start_offset, const char *prefix, gboolean preserve_wrapping)
 {
 	int slen, prefix_len;
 	char *eol_ptr;
@@ -312,18 +361,31 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 	char **lines, **ln;
 	enum { max_len = 77 };
 
-	slen = strlen (s);	
-	eol_ptr = strstr (s, "\\n");
-	if ((eol_ptr == NULL || (eol_ptr - s + 2 == slen))
+	if (preserve_wrapping) {
+		int i, offset = 0;
+		for (i = 0; i < s->num_lines; i++) {
+			int line_len = s->line_lengths[i];
+			if (i > 0) {
+				potool_printf ("%s", prefix);
+			}
+			potool_printf ("\"%.*s\"\n", line_len, s->str + offset);
+			offset += line_len;
+		}
+		return;
+	}
+
+	slen = strlen (s->str);
+	eol_ptr = strstr (s->str, "\\n");
+	if ((eol_ptr == NULL || (eol_ptr - s->str + 2 == slen))
 	    && slen < (RMARGIN - 2 - start_offset)) {
-		potool_printf ("\"%s\"\n", s);
+		potool_printf ("\"%s\"\n", s->str);
 		return;
 	}
 
 	potool_printf ("\"\"\n");
 	prefix_len = strlen (prefix);
-	has_final_eol = strcmp (s + slen - 2, "\\n") == 0;
-	lines = g_strsplit (s, "\\n", 0);
+	has_final_eol = strcmp (s->str + slen - 2, "\\n") == 0;
+	lines = g_strsplit (s->str, "\\n", 0);
 	for (ln = lines; *ln != NULL; ln++) {
 		char *cur;
 		int offset;
@@ -377,20 +439,20 @@ print_multi_line (const char *s, int start_offset, const char *prefix)
 }
 
 static void
-write_msgstr (char *prefix, char *str, GSList *strn, po_write_modes mode)
+write_msgstr (char *prefix, StringBlock *str, GSList *strn, po_write_modes mode, gboolean preserve_wrapping)
 {
 	int prefix_len = strlen(prefix);
 
 	if (!(mode & NO_TRANSLATION)) {
-		if (str) {
+		if (str && str->str) {
 			potool_printf ("%smsgstr ", prefix);
-			print_multi_line (str, 7 + prefix_len, prefix);
+			print_multi_line (str, 7 + prefix_len, prefix, preserve_wrapping);
 		} else {
 			GSList *x;
 			for (x = strn; x != NULL; x = x->next) {
 				MsgStrX *m = x->data;
 				potool_printf ("%smsgstr[%d] ", prefix, m->n);
-				print_multi_line (m->str, 10 + prefix_len, prefix);
+				print_multi_line (m->str, 10 + prefix_len, prefix, preserve_wrapping);
 			}
 		}
 	} else {
@@ -399,7 +461,7 @@ write_msgstr (char *prefix, char *str, GSList *strn, po_write_modes mode)
 }
 
 static void
-po_write (PoFile *pof, po_write_modes mode)
+po_write (PoFile *pof, po_write_modes mode, gboolean preserve_wrapping)
 {
 	GSList *l;
 
@@ -452,31 +514,31 @@ po_write (PoFile *pof, po_write_modes mode)
 		if (!(mode & NO_PREVIOUS)) {
 			if (po->previous.ctx) {
 				potool_printf ("#| msgctxt ");
-				print_multi_line (po->previous.ctx, 11, "");
+				print_multi_line (po->previous.ctx, 11, "", preserve_wrapping);
 			}
 			if (po->previous.id) {
 				potool_printf ("#| msgid ");
-				print_multi_line (po->previous.id, 9, "");
+				print_multi_line (po->previous.id, 9, "", preserve_wrapping);
 			}
 			if (po->previous.id_plural) {
 				potool_printf ("#| msgid_plural ");
-				print_multi_line (po->previous.id, 16, "");
+				print_multi_line (po->previous.id, 16, "", preserve_wrapping);
 			}
 		}
 		if ((!(mode & NO_CTX)) && po->ctx) {
 			potool_printf ("msgctxt ");
-			print_multi_line (po->ctx, 8, "");
+			print_multi_line (po->ctx, 8, "", preserve_wrapping);
 		}
 		if (!(mode & NO_ID)) {
 			potool_printf ("msgid ");
-			print_multi_line (po->id, 6, "");
+			print_multi_line (po->id, 6, "", preserve_wrapping);
 			if (po->id_plural) {
 				potool_printf ("msgid_plural ");
-				print_multi_line (po->id_plural, 13, "");
+				print_multi_line (po->id_plural, 13, "", preserve_wrapping);
 			}
 		}
 		if (!(mode & NO_STR)) {
-			write_msgstr ("", po->str, po->msgstrxs, mode);
+			write_msgstr ("", po->str, po->msgstrxs, mode, preserve_wrapping);
 		}
 
 		if (l->next != NULL) {
@@ -505,33 +567,33 @@ po_write (PoFile *pof, po_write_modes mode)
 		if (!(mode & NO_PREVIOUS)) {
 			if (po->previous.ctx) {
 				potool_printf ("#~| msgctxt ");
-				print_multi_line (po->previous.ctx, 12, "");
+				print_multi_line (po->previous.ctx, 12, "", preserve_wrapping);
 			}
 			if (po->previous.id) {
 				potool_printf ("#~| msgid ");
-				print_multi_line (po->previous.id, 10, "");
+				print_multi_line (po->previous.id, 10, "", preserve_wrapping);
 			}
 			if (po->previous.id_plural) {
 				potool_printf ("#~| msgid_plural ");
-				print_multi_line (po->previous.id, 17, "");
+				print_multi_line (po->previous.id, 17, "", preserve_wrapping);
 			}
 		}
 
 		if ((!(mode & NO_CTX)) && po->ctx) {
 			potool_printf ("#~ msgctxt ");
-			print_multi_line (po->ctx, 11, "#~ ");
+			print_multi_line (po->ctx, 11, "#~ ", preserve_wrapping);
 		}
 
 		if (!(mode & NO_ID)) {
 			potool_printf ("#~ msgid ");
-			print_multi_line (po->id, 9, "#~ ");
+			print_multi_line (po->id, 9, "#~ ", preserve_wrapping);
 			if (po->id_plural) {
 				potool_printf ("#~ msgid_plural ");
-				print_multi_line (po->id_plural, 16, "#~ ");
+				print_multi_line (po->id_plural, 16, "#~ ", preserve_wrapping);
 			}
 		}
 		if (!(mode & NO_STR)) {
-			write_msgstr ("#~ ", po->str, po->msgstrxs, mode);
+			write_msgstr ("#~ ", po->str, po->msgstrxs, mode, preserve_wrapping);
 		}
 
 		if (l->next != NULL) {
@@ -548,11 +610,11 @@ static PoEntry_set *
 po_set_create (GSList *po_list)
 {
 	GSList *l;
-	GHashTable *hash = g_hash_table_new (g_str_hash, g_str_equal);
+	PoEntry_set *hash = g_hash_table_new (g_str_hash, g_str_equal);
 	for (l = po_list; l != NULL; l = l->next) {
 		PoEntry *po = l->data;
 
-		g_hash_table_insert (hash, po->id, po);
+		g_hash_table_insert (hash, po->id->str, po);
 	}
 	return hash;
 }
@@ -565,11 +627,12 @@ po_set_update (PoEntry_set *po_set, GSList *po_list)
 	for (l = po_list; l != NULL; l = l->next) {
 		PoEntry *po = (PoEntry *) l->data, *hpo;
 
-		if ((hpo = g_hash_table_lookup (po_set, po->id)) != NULL) {
+		if ((hpo = g_hash_table_lookup (po_set, po->id->str)) != NULL) {
+			po_entry_free_contents (hpo);
 			/* making a deep copy, since we are about to free po_list */
 			po_entry_copy (hpo, po);
 		} else {
-			g_warning (_("Unknown msgid: %s"), po->id);
+			g_warning (_("Unknown msgid: %s"), po->id->str);
 		}
 	}
 	return po_set;
@@ -582,21 +645,15 @@ main (int argc, char **argv)
 	/* -- */
 	gboolean istats = FALSE;
 	gboolean copy_msgid = FALSE;
+	gboolean preserve_wrapping = FALSE;
 	PoFilters ifilters = 0;
 	po_write_modes write_mode = 0;
 
-	/*
-		FILENAME1 [FILENAME2]
-		[-f f|nf|t|nt|nth|o|no]
-		[-s] [-c]
-		[-n ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf]...
-		[-h]
-	 */
-	while ((c = getopt (argc, argv, "f:n:sch")) != EOF) {
+	while ((c = getopt (argc, argv, "f:n:scph")) != EOF) {
 		switch (c) {
 			case 'h' :
 				fprintf (stderr, _(
-				"Usage: %s -i FILENAME1 [FILENAME2] [FITERS] [-s] [OUTPUT_OPTIONS] [-h]\n"
+				"Usage: %s FILENAME1 [FILENAME2] [FILTERS] [-s] [-c] [-p] [-h]\n"
 				"\n"
 				), argv[0]);
 				exit (EXIT_SUCCESS);
@@ -632,6 +689,9 @@ main (int argc, char **argv)
 				break;
 			case 'c':
 				copy_msgid = TRUE;
+				break;
+			case 'p':
+				preserve_wrapping = TRUE;
 				break;
 			case 'f' :
 				if (strcmp (optarg, "f") == 0) {
@@ -679,7 +739,7 @@ main (int argc, char **argv)
 			if (copy_msgid) {
 				po_copy_msgid (pof);
 			}
-			po_write (pof, write_mode);
+			po_write (pof, write_mode, preserve_wrapping);
 		}
 		po_free (pof);
 	} else {
@@ -695,7 +755,8 @@ main (int argc, char **argv)
 			po_copy_msgid (pof);
 		}
 		bpo_set = po_set_update (bpo_set, pof->entries);
-		po_write (bpof, write_mode);
+		po_write (bpof, write_mode, preserve_wrapping);
+		g_hash_table_destroy (bpo_set);
 		po_free (bpof);
 		po_free (pof);
 	}

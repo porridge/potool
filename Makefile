@@ -55,3 +55,4 @@ dist: clean
 
 check: potool
 	cd tests && bash test
+# make clean check G_SLICE=always-malloc WRAPPER='valgrind --leak-check=full --show-reachable=yes --error-exitcode=1' CC=colorgcc CFLAGS="-O0 -Wall -Werror"
