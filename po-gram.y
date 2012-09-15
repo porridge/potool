@@ -23,7 +23,7 @@ int polex (void);
 void poerror (const char *s);
 
 static GSList *entries = NULL, *obsolete_entries = NULL;
-static char *concat_strings (GSList *slist);
+static StringBlock *concat_strings (GSList *slist);
 
 %}
 
@@ -32,6 +32,7 @@ static char *concat_strings (GSList *slist);
 %union {
 	int int_val;
 	char *str_val;
+	StringBlock *stringblock_val;
 	GSList *gslist_val;
 	PoEntry *entry_val;
 	PoComments comments_val;
@@ -51,14 +52,14 @@ static char *concat_strings (GSList *slist);
 %token <str_val> COMMENT_SPECIAL
 %token <str_val> COMMENT_RESERVED
 
-%type <str_val> msgctx
-%type <str_val> obsolete_msgctx
-%type <str_val> previous_ctx
-%type <str_val> obsolete_previous_ctx
-%type <str_val> previous_id
-%type <str_val> obsolete_previous_id
-%type <str_val> previous_id_plural
-%type <str_val> obsolete_previous_id_plural
+%type <stringblock_val> msgctx
+%type <stringblock_val> obsolete_msgctx
+%type <stringblock_val> previous_ctx
+%type <stringblock_val> obsolete_previous_ctx
+%type <stringblock_val> previous_id
+%type <stringblock_val> obsolete_previous_id
+%type <stringblock_val> previous_id_plural
+%type <stringblock_val> obsolete_previous_id_plural
 %type <gslist_val> string_list
 %type <gslist_val> obsolete_string_list
 %type <gslist_val> really_obsolete_string_list
@@ -455,31 +456,33 @@ void po_init_parser (void)
 {
 }
 
-static char *
+static StringBlock*
 concat_strings (GSList *slist)
 {
 	GSList *l;
-	int total_len;
-	char *str, *p;
+	int total_len = 0, i = 0;
+	char *p;
+	StringBlock *ret = g_new(StringBlock, 1);
+	ret->num_lines = 0;
 
-	total_len = 0;
 	for (l = slist; l != NULL; l = l->next) {
 		total_len += strlen (l->data);
+		ret->num_lines++;
 	}
-	str = g_malloc (total_len + 1);
-	p = str;
+	ret->str = g_malloc (total_len + 1);
+	ret->line_lengths = g_malloc (sizeof(int) * ret->num_lines);
+	p = ret->str;
 	for (l = slist; l != NULL; l = l->next) {
 		char *s = l->data;
-		int len;
-
-		len = strlen (s);
+		int len = strlen (s);
 		if (len > 0) {
 			g_memmove (p, s, len);
 			p += len;
 		}
+		ret->line_lengths[i++] = len;
 	}
-	str[total_len] = '\0';
-	return str;
+	ret->str[total_len] = '\0';
+	return ret;
 }
 
 void

@@ -17,16 +17,22 @@ void po_init_parser(void);
 /* ---- */
 
 typedef struct {
+	char *str;
+	int num_lines;
+	int *line_lengths;
+} StringBlock;
+
+typedef struct {
 	GSList *std, *pos, *res;
 	GSList *spec;
 } PoComments;
 
 typedef struct {
-	char *ctx, *id, *id_plural;
+	StringBlock *ctx, *id, *id_plural;
 } PoPrevious;
 
 typedef struct {
-	char *str;
+	StringBlock *str;
 	int n;
 } MsgStrX;
 
@@ -34,7 +40,7 @@ typedef struct {
 	PoComments comments;
 	PoPrevious previous;
 	gboolean is_fuzzy, is_c_format;
-	char *ctx, *id, *id_plural, *str;
+	StringBlock *ctx, *id, *id_plural, *str;
 	GSList *msgstrxs;
 } PoEntry;
 

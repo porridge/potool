@@ -1,16 +1,18 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH POEDIT 1 "21 września 2007"
+.TH POEDIT 1 "15 września 2012"
 .\" Proszę aktualizować datę przy zmianach treści
 .SH NAZWA
 poedit \- program wspomagający edycję plików po gettext
 .SH SKŁADNIA
 .B poedit
 .RI [\-a]
+.RI [\-p]
 .RI [\-n]
 .RI <plik.po>
 .sp
 .B potooledit
 .RI [\-a]
+.RI [\-p]
 .RI [\-n]
 .RI <plik.po>
 .SH OPIS
@@ -44,6 +46,11 @@ edycji (grupuje je jednak oddzielnie).
 Bez tej opcji tylko nieprzetłumaczone wpisy (i nagłówek pliku) są przedstawione
 do edycji.
 .TP
+.B \-p
+powoduje zachowanie oryginalnego formatowania. Bez tej opcji program zawija na
+znakach końca linii lub między wyrazami wszystkie linie w edytowanych plikach
+tak aby zmieściły się w 80 kolumnach.
+.TP
 .B \-n
 powoduje
 .I zaniechanie
@@ -58,8 +65,9 @@ znaki ASCII, w związku z czym edytor będzie mógł zinterpretować jego kodowa
 jako kodowanie locale. To z kolei spowoduje, że po połączeniu z tymczasowym
 plikiem, wyjściowy będzie nieprawidłowy. Zgłoszenie błędu Debiana #297074
 zawiera przykładowy opis takiej sytuacji.
-.SH BŁĘDY
-Ten program zawija po swojemu wszystkie linie w edytowanych plikach.
+.SH PRZESTROGI
+Domyślnie ten program zawija po swojemu wszystkie linie w edytowanych plikach. Patrz też opcja
+.B \-p
 .SH ZOBACZ TAKŻE
 .BR potool (1),
 .BR postats (1),

@@ -1,16 +1,18 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH POEDIT 1 "September 21, 2007"
+.TH POEDIT 1 "September 15, 2012"
 .\" Please adjust this date whenever revising the manpage.
 .SH NAME
 poedit \- program to aid editing gettext po files
 .SH SYNOPSIS
 .B poedit
 .RI [\-a]
+.RI [\-p]
 .RI [\-n]
 .RI <file.po>
 .sp
 .B potooledit
 .RI [\-a]
+.RI [\-p]
 .RI [\-n]
 .RI <file.po>
 .SH DESCRIPTION
@@ -43,6 +45,11 @@ file for editing (they are grouped separately, though).
 Without this option, only the untranslated entries (and the file header) are
 presented for editing.
 .TP
+.B \-p
+causes poedit to keep the formatting of the file intact. Without this option,
+all strings will be re-wrapped at newlines or word boundaries to fit in 80
+columns.
+.TP
 .B \-n
 causes poedit not to do
 .I any
@@ -57,8 +64,10 @@ characters, which means your editor will be free to interpret this as your
 default locale encoding. This in turn, will make the file invalid when it is
 merged together with the already translated messages. See Debian bug #297074
 for an example of this happening.
-.SH BUGS
-The program re-wraps lines in all strings in the edited file.
+.SH CAVEATS
+By default, the program re-wraps lines in all strings in the edited file. See the
+.B \-p
+option.
 .SH SEE ALSO
 .BR potool (1),
 .BR postats (1),

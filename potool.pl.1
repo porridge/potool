@@ -10,6 +10,7 @@ potool \- program do manipulowania plikami po gettext
 .RI [\-f " f|nf|t|nt|nth|o|no"]
 .RI [\-n " ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
 .RI [\-s]
+.RI [\-p]
 .RI [\-c]
 .sp
 .B potool
@@ -89,6 +90,11 @@ interesujących zmianach numerów linii.
 .B \-s
 powoduje wypisanie tylko liczby wpisów zamiast ich treści
 .TP
+.B \-p
+powoduje zachowanie oryginalnego formatowania. Bez tej opcji program zawija na
+znakach końca linii lub między wyrazami wszystkie linie na wyjściu tak aby
+zmieściły się w 80 kolumnach.
+.TP
 .B \-c
 kopiuje we wszystkich wpisach część 'id' do 'str' (być może zastępując tłumaczenie)
 .TP
@@ -116,8 +122,9 @@ starych.
 .P
 Ostatnie dwa przykłady są zaimplementowane jako program
 .BR potooledit (1).
-.SH BŁĘDY
-Ten program zawija po swojemu wszystkie linie na wyjściu.
+.SH PRZESTROGI
+Domyślnie ten program zawija po swojemu wszystkie linie na wyjściu. Patrz też opcja
+.B \-p
 .SH ZOBACZ TAKŻE
 .BR potooledit (1),
 .BR postats (1),

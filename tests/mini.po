@@ -1,0 +1,8 @@
+# A tiny po file for potool debugging.
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-games\n"
+
+#: ../aisleriot/aisleriot.schemas.in.h:1
+msgid "Select the style of control"
+msgstr "Wybierz rodzaj sterowania"

@@ -17,7 +17,7 @@ GTAR = tar
 GLIB_LIB = $(shell pkg-config --libs glib-2.0)
 GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
 CPPFLAGS += $(GLIB_INCLUDE)
-CFLAGS += -g -Wall -Werror -O2
+CFLAGS += -g -Wall -Werror
 LDLIBS += $(GLIB_LIB)
 
 THINGS  = potool po.tab lex.po
@@ -55,3 +55,4 @@ dist: clean
 
 check: potool
 	cd tests && bash test
+# make clean check G_SLICE=always-malloc WRAPPER='valgrind --leak-check=full --show-reachable=yes --error-exitcode=1' CC=colorgcc CFLAGS="-O0 -Wall -Werror"

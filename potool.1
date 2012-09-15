@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH POTOOL 1 "September 21, 2007"
+.TH POTOOL 1 "September 15, 2012"
 .\" Please adjust this date whenever revising the manpage.
 .SH NAME
 potool \- program for manipulating gettext po files
@@ -10,6 +10,7 @@ potool \- program for manipulating gettext po files
 .RI [\-f " f|nf|t|nt|nth|o|no"]
 .RI [\-n " ctxt|id|str|cmt|ucmt|pcmt|scmt|dcmt|tr|linf"]...
 .RI [\-s]
+.RI [\-p]
 .RI [\-c]
 .sp
 .B potool
@@ -82,6 +83,11 @@ as it usually returns lots of unimportant line number changes otherwise.
 .B \-s
 Don't display the entries themselves, only their count.
 .TP
+.B \-p
+causes potool to keep the formatting of the file intact. Without this option,
+all strings will be re-wrapped in the output at newlines or word boundaries to
+fit in 80 columns.
+.TP
 .B \-c
 Overwrite all msgstrs with their msgids.
 .TP
@@ -109,8 +115,10 @@ entries
 The last two examples are implemented as the
 .BR potooledit (1)
 program.
-.SH BUGS
-The program re-wraps lines in all strings in the output.
+.SH CAVEATS
+By default, the program re-wraps lines in all strings in the output. See the
+.B \-p
+option.
 .SH SEE ALSO
 .BR potooledit (1),
 .BR postats (1),

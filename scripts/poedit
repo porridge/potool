@@ -8,7 +8,7 @@ POTMP=`mktemp -d -t poedit.XXXXXX` || exit 1
 
 function usage()
 {
-	echo "Usage: poedit [ -a ] [ -n ] <file.po>" >&2
+	echo "Usage: poedit [ -a ] [ -p ] [ -n ] <file.po>" >&2
 	exit 1
 }
 
@@ -17,8 +17,9 @@ function usage()
 #
 INCLUDE_ALL_MSGS=no
 IGNORE_ENCODING=no
+PRESERVE_WRAPPING=no
 
-TEMP=`getopt -o an -n 'poedit' -- "$@"`
+TEMP=`getopt -o anp -n 'poedit' -- "$@"`
 if [ $? != 0 ] ; then usage ; fi
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
@@ -31,6 +32,10 @@ while true ; do
 		;;
 	-n)
 		IGNORE_ENCODING=yes
+		shift
+		;;
+	-p)
+		PRESERVE_WRAPPING=yes
 		shift
 		;;
 	--)
@@ -65,11 +70,17 @@ else
 	exit 1
 fi
 
+if [ $PRESERVE_WRAPPING = yes ]; then
+	potool="potool -p"
+else
+	potool="potool"
+fi
+
 #
 # Get file encoding
 #
 if [ $IGNORE_ENCODING = no ] ; then
-	input_encoding=$(potool -ft -fnth "$POFILE" | egrep -m 1 -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
+	input_encoding=$($potool -ft -fnth "$POFILE" | egrep -m 1 -i '^"Content-Type:' | perl -p -e 's,^.*charset=(.*?)( *;.*)?\\n"$,$1,')
 	if [ -z "$input_encoding" ] ; then
 		echo "Failed to retrieve encoding from the content-type header." 1>&2
 		echo "Make sure the file has a proper header before running $0" 1>&2
@@ -88,13 +99,13 @@ fi
 
 if [ "$INCLUDE_ALL_MSGS" = "yes" ]
 then
-	potool "$POFILE" -ft -fno > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft -fno > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	$potool "$POFILE" -ft -fno > "$TMPFILE" || { echo "Running '$potool \"$POFILE\" -ft -fno > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 	echo >> "$TMPFILE"
-	potool "$POFILE" -fnt >> "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnt >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	$potool "$POFILE" -fnt >> "$TMPFILE" || { echo "Running '$potool \"$POFILE\" -fnt >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 	echo >> "$TMPFILE"
-	potool "$POFILE" -ft -fo >> "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -ft -fo >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	$potool "$POFILE" -ft -fo >> "$TMPFILE" || { echo "Running '$potool \"$POFILE\" -ft -fo >> \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 else
-	potool "$POFILE" -fnth > "$TMPFILE" || { echo "Running 'potool \"$POFILE\" -fnth > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
+	$potool "$POFILE" -fnth > "$TMPFILE" || { echo "Running '$potool \"$POFILE\" -fnth > \"$TMPFILE\"' failed with code $?" >&2; exit 1; }
 fi
 
 if [ $IGNORE_ENCODING = no ] ; then
@@ -154,10 +165,10 @@ if [ $IGNORE_ENCODING = no ] ; then
 fi
 
 mv "$POFILE" "$POFILE~" || { echo "Failed to rename \"$POFILE\" to \"$POFILE~\""; exit 1; }
-potool "$POFILE~" "$TMPFILE" > "$POFILE"
+$potool "$POFILE~" "$TMPFILE" > "$POFILE"
 if [ $? -eq 0 ]; then
-	printf "Before: %s/%s\n" `potool -ft -s "$POFILE~"` `potool -s "$POFILE~"`
-	printf "After:  %s/%s\n" `potool -ft -s "$POFILE"` `potool -s "$POFILE"`
+	printf "Before: %s/%s\n" `$potool -ft -s "$POFILE~"` `$potool -s "$POFILE~"`
+	printf "After:  %s/%s\n" `$potool -ft -s "$POFILE"` `$potool -s "$POFILE"`
 	rm -f "$POFILE~" "$TMPFILE"
 else
 	mv -f "$POFILE~" "$POFILE"
