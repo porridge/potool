@@ -1,3 +1,10 @@
+potool (0.16-2) unstable; urgency=low
+
+  * Upload to sid.
+  * Bumped standards-version.
+
+ -- Marcin Owsiany <porridge@debian.org>  Tue, 22 Apr 2014 08:49:22 +0200
+
 potool (0.16-1) experimental; urgency=low
 
   * New version

@@ -2,7 +2,7 @@ Source: potool
 Section: utils
 Priority: optional
 Maintainer: Marcin Owsiany <porridge@debian.org>
-Standards-Version: 3.9.3
+Standards-Version: 3.9.5
 Build-Depends: libglib2.0-dev, bison, flex, debhelper (>= 8)
 
 Package: potool
