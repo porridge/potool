@@ -2,8 +2,8 @@ Source: potool
 Section: utils
 Priority: optional
 Maintainer: Marcin Owsiany <porridge@debian.org>
-Standards-Version: 3.9.5
-Build-Depends: libglib2.0-dev, bison, flex, debhelper (>= 8)
+Standards-Version: 4.1.0
+Build-Depends: libglib2.0-dev, bison, flex, debhelper (>= 8), rename
 
 Package: potool
 Architecture: any

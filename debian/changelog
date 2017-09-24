@@ -1,3 +1,10 @@
+potool (0.16-3) unstable; urgency=medium
+
+  * Updated standards-version, no changes needed
+  * Declare build-dependency on rename. Closes: #876619
+
+ -- Marcin Owsiany <porridge@debian.org>  Sun, 24 Sep 2017 21:00:55 +0200
+
 potool (0.16-2) unstable; urgency=low
 
   * Upload to sid.
