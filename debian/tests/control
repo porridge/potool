@@ -1,0 +1,2 @@
+Test-Command: test $(potool -n ctxt -n str -n dcmt -n linf -s -fnt debian/tests/data/smoke-test-input.po) -eq 0
+Features: test-name=smoke

@@ -2,14 +2,16 @@ Source: potool
 Section: utils
 Priority: optional
 Maintainer: Marcin Owsiany <porridge@debian.org>
-Standards-Version: 4.1.0
-Build-Depends: libglib2.0-dev, bison, flex, debhelper (>= 8), rename
+Standards-Version: 4.3.0
+Build-Depends: libglib2.0-dev, bison, flex, debhelper (>> 9), rename
+Vcs-Git: https://github.com/porridge/potool -b debian
+Vcs-Browser: https://github.com/porridge/potool/tree/debian
+Homepage: http://marcin.owsiany.pl/potool-page
 
 Package: potool
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, sensible-utils
 Breaks: poedit (<< 1.0.3-2)
-Homepage: http://marcin.owsiany.pl/potool-page
 Description: program to aid manipulation of gettext po files
  This package contains the filter program 'potool', as well
  as a few helper scripts:

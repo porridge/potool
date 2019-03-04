@@ -1,3 +1,14 @@
+potool (0.16-4) unstable; urgency=medium
+
+  * Bumped debhelper compat level to 9
+  * Bumped Standards-Version, no changes needed
+  * Added Vcs-* headers, moved the Homepage one to the top stanza
+  * Declared a dependency on sensible-utils
+  * Removed explicit setting of *FLAGS, as dh does this more correctly
+  * Enabled all hardening options
+
+ -- Marcin Owsiany <porridge@debian.org>  Mon, 04 Mar 2019 21:42:07 +0100
+
 potool (0.16-3) unstable; urgency=medium
 
   * Updated standards-version, no changes needed
