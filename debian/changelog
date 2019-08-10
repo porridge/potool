@@ -1,3 +1,12 @@
+potool (0.17-1) unstable; urgency=medium
+
+  * New upstream version
+    - makes it possible to pass custom pkg-config path, which helps
+      cross-building. Closes: #930959
+  * Bumped Standards-Version, no changes needed
+
+ -- Marcin Owsiany <porridge@debian.org>  Sat, 10 Aug 2019 18:07:21 +0200
+
 potool (0.16-4) unstable; urgency=medium
 
   * Bumped debhelper compat level to 9
