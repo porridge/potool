@@ -1,21 +1,22 @@
 #
 # potool is a program aiding editing of po files
 # Copyright (C) 1999-2002 Zbigniew Chyla
-# Copyright (C) 2000-2012 Marcin Owsiany
+# Copyright (C) 2000-2019 Marcin Owsiany
 #
 # see LICENSE for licensing info
 #
 
-VER = 0.15
+VER = 0.17
 
 DESTDIR = /usr/local
 BINDIR = $(DESTDIR)/bin
 INSTALL = install
 BININSTALL = $(INSTALL) -s
 GTAR = tar
+PKG_CONFIG ?= pkg-config
 
-GLIB_LIB = $(shell pkg-config --libs glib-2.0)
-GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
+GLIB_LIB = $(shell $(PKG_CONFIG) --libs glib-2.0)
+GLIB_INCLUDE = $(shell $(PKG_CONFIG) --cflags glib-2.0)
 CPPFLAGS += $(GLIB_INCLUDE)
 CFLAGS += -g -Wall -Werror
 LDLIBS += $(GLIB_LIB)

@@ -54,7 +54,7 @@ It is possible to stack filters, by specifying multiple -f options.
 .B \-n filter
 Determines which po file entries parts should
 .I not
-be retained. Any number of -n options is allowed. Valid parameters are:
+be retained. Any number of \-n options is allowed. Valid parameters are:
 .br
 ctxt  \- don't write 'ctxt' parts
 .br
@@ -95,20 +95,20 @@ Overwrite all msgstrs with their msgids.
 Display short usage help.
 .SH EXAMPLES
 .TP
-potool x.po -s -ft
+potool x.po \-s \-ft
 displays the number of translated entries. See also
 .BR postats (1).
 .TP
-potool x.po -nstr
+potool x.po \-nstr
 Deletes all translations - so you can start from scratch! :-)
 .TP
-potool x.po -ft && potool x.po -fnt
+potool x.po \-ft && potool x.po \-fnt
 displays firstly the translated and then the non-translated entries from file x.po
 (reverse order is not recommended because of the first "header" entry).
 The output contains all information from x.po, with the difference that
 untranslated entries are located together in a single place.
 .TP
-potool x.po -fnt > tmp.po && editor tmp.po && potool x.po tmp.po
+potool x.po \-fnt > tmp.po && editor tmp.po && potool x.po tmp.po
 lets you easily add new translations, without looking at the already translated
 entries
 .P
