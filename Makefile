@@ -13,9 +13,10 @@ BINDIR = $(DESTDIR)/bin
 INSTALL = install
 BININSTALL = $(INSTALL) -s
 GTAR = tar
+PKG_CONFIG ?= pkg-config
 
-GLIB_LIB = $(shell pkg-config --libs glib-2.0)
-GLIB_INCLUDE = $(shell pkg-config --cflags glib-2.0)
+GLIB_LIB = $(shell $(PKG_CONFIG) --libs glib-2.0)
+GLIB_INCLUDE = $(shell $(PKG_CONFIG) --cflags glib-2.0)
 CPPFLAGS += $(GLIB_INCLUDE)
 CFLAGS += -g -Wall -Werror
 LDLIBS += $(GLIB_LIB)
