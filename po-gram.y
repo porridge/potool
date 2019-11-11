@@ -27,7 +27,7 @@ static StringBlock *concat_strings (GSList *slist);
 
 %}
 
-%error-verbose
+%define parse.error verbose
 
 %union {
 	int int_val;
@@ -476,7 +476,7 @@ concat_strings (GSList *slist)
 		char *s = l->data;
 		int len = strlen (s);
 		if (len > 0) {
-			g_memmove (p, s, len);
+			memmove (p, s, len);
 			p += len;
 		}
 		ret->line_lengths[i++] = len;
