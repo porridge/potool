@@ -1,13 +1,13 @@
-potool jest programem wspomagaj±cym edycjê plików po
+potool jest programem wspomagajÄ…cym edycjÄ™ plikÃ³w po
 Copyright (C) 1999-2003 Zbigniew Chyla
-Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
+Copyright (C) 2000-2019 Marcin Owsiany <porridge@debian.org>
 
-Licencja znajduje siê w pliku LICENSE
+Licencja znajduje siÄ™ w pliku LICENSE
 
 Pakiety potrzebne do kompilacji programu:
-	gcc, bison, flex, glib 2.x w wersji -devel
+	gcc, bison, flex, glib 2.x
 
-Dokumentacja dostêpna jest w postaci stron podrêcznika (man):
+Dokumentacja dostÄ™pna jest w postaci stron podrÄ™cznika (man):
   poedit.pl.1
   potool.pl.1
   postats.pl.1

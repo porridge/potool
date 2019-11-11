@@ -1,7 +1,7 @@
 potool is a program for manipulating gettext po files
 
 Copyright (C) 1999-2003 Zbigniew Chyla
-Copyright (C) 2000-2012 Marcin Owsiany <porridge@debian.org>
+Copyright (C) 2000-2019 Marcin Owsiany <porridge@debian.org>
 
 The license is in the LICENSE file
 
