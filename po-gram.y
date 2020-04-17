@@ -18,7 +18,7 @@
 #include "common.h"
 #include "i18n.h"
 
-int polineno;
+extern int polineno;
 int polex (void);
 void poerror (const char *s);
 
