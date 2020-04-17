@@ -1,3 +1,11 @@
+potool (0.19-1) unstable; urgency=medium
+
+  * New upstream version
+    - fixes FTBFS with GCC 10 due to strict treatment of extern
+      declarations. Closes: #957702
+
+ -- Marcin Owsiany <porridge@debian.org>  Fri, 17 Apr 2020 21:33:21 +0200
+
 potool (0.18-1) unstable; urgency=medium
 
   * New upstream version
