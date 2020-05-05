@@ -2,9 +2,9 @@ Source: potool
 Section: utils
 Priority: optional
 Maintainer: Marcin Owsiany <porridge@debian.org>
-Standards-Version: 4.4.1
-Build-Depends: libglib2.0-dev, bison, flex, debhelper (>> 9), rename
-Vcs-Git: https://github.com/porridge/potool -b debian
+Standards-Version: 4.5.0
+Build-Depends: libglib2.0-dev, bison, flex, debhelper-compat (= 12), rename
+Vcs-Git: https://github.com/porridge/potool.git -b debian
 Vcs-Browser: https://github.com/porridge/potool/tree/debian
 Homepage: http://marcin.owsiany.pl/potool-page
 
