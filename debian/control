@@ -11,7 +11,6 @@ Homepage: http://marcin.owsiany.pl/potool-page
 Package: potool
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, sensible-utils
-Breaks: poedit (<< 1.0.3-2)
 Description: program to aid manipulation of gettext po files
  This package contains the filter program 'potool', as well
  as a few helper scripts:
